@@ -5,7 +5,7 @@ import openfl.utils.Assets;
 
 class FoxLoaderUtil {
 
-	public static var PathsClass:Dynamic = null;
+	public static var PathsClass:Dynamic = funkin.Paths;
 
 	/**
 		For Friday Night Funkin' Engines, this is a custom path function for custom library paths.
