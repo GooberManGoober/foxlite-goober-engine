@@ -66,6 +66,11 @@ class FoxPhysicsWorld extends FoxBasic {
 		world.workerCount = 1;
 	}
 
+	public static function staticInit() {
+		var version = Box3D.getVersion();
+		trace('[FoxLite > FoxPhysicsWorld]: Initialized Box3D version ${version.major}.${version.minor} rev. ${version.revision}');
+	}
+
 	/**
 		Steps the physics simulation.
 

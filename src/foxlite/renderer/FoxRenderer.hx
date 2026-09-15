@@ -28,6 +28,10 @@ import foxlite.texture.FoxMipFilter;
 import foxlite.texture.FoxWrapMode;
 import foxlite.polyfill.TypedArray;
 
+#if lime_box3d
+import foxlite.physics.FoxPhysicsWorld;
+#end
+
 import lime.graphics.opengl.GL;
 import lime.utils.DataPointer;
 import lime.utils.Float32Array;
@@ -198,7 +202,7 @@ class FoxRenderer {
 		trace('[FoxLite > FoxRenderer]: Texture Anisotropy ${extensions.anisotropic == null ?  "not" : "is"} supported.');
 
 		var extTxt = new StringBuf();
-		extTxt.add("Active Extensions: ");
+		extTxt.add("[FoxLite > FoxRenderer]: Active Extensions: ");
 		for(extName in Reflect.fields(extensions)) {
 			var ext = Reflect.field(extensions, extName);
 			if(ext != null) extTxt.add('${Std.string(ext)}  ');
@@ -309,6 +313,7 @@ class FoxRenderer {
 		Initializes static classes
 	**/
 	public static function initLibs() {
+		trace('---------------     Initializing Libs     ---------------');
 		FoxMathUtil.staticInit();
 		FoxCache.staticInit();
 		FoxRenderer.staticInit();
@@ -319,6 +324,11 @@ class FoxRenderer {
 		trace(BoundingBox.__tempBounds);
 		trace(BoundingBox.__tempBounds2);
 		#end
+
+		#if lime_box3d
+		FoxPhysicsWorld.staticInit();
+		#end
+		trace('--------------- Finished Initializing Libs ---------------');
 	}
 
 	/*
