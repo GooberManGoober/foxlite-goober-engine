@@ -49,7 +49,8 @@ import lime.math.Vector2;
 import lime.graphics.Image;
 import lime.system.Endian;
 
-import openfl.Assets;
+import funkin.FunkinAssets;
+
 import openfl.geom.Vector3D;
 import openfl.geom.Matrix3D;
 import openfl.utils.ByteArray;
@@ -131,6 +132,10 @@ class FoxGLTFLoader {
 	**/
 	public static function load(name:String, ?extraShaderFlags:Array<String>, ?customShaderPath:String):GLTFData {
 		var dir:String = Path.directory(name) + '/';
+		trace('[FoxLite > FoxGLTFLoader]: Attempting to load model from $dir.');
+
+		if(FunkinAssets.exists(dir)) trace('[FoxLite > FoxGLTFLoader]: Model Path does exist.');
+		else trace('[FoxLite > FoxGLTFLoader]: Model Path does NOT exist.');
 
 		var gltfJson:Dynamic = FoxLoaderUtil.loadJSON(name);
 		if(gltfJson == null) {
@@ -150,12 +155,12 @@ class FoxGLTFLoader {
 
 			var buffer:ByteArray = null;
 			if(!isDataUrl) {
-				if(!Assets.exists(bufPath)) {
+				if(!FunkinAssets.exists(bufPath)) {
 					buffers.push(null);
 					trace('[FoxLite > FoxGLTFLoader]: Warning! buffer $i not found! (Loading: $bufPath)');
 					continue;
 				}
-				buffer = Assets.getBytes(bufPath);
+				buffer = FunkinAssets.getBytes(bufPath);
 				if(buffer == null) {
 					trace('[FoxLite > FoxGLTFLoader]: Warning! Could not load buffer $i! (Loading: $bufPath)');
 					buffers.push(null);
@@ -187,12 +192,12 @@ class FoxGLTFLoader {
 	**/
 	public static function loadBinary(name:String, ?extraShaderFlags:Array<String>, ?customShaderPath:String):GLTFData {
 		var path = FoxLoaderUtil.filePath(name);
-		if(!Assets.exists(path)) {
+		if(!FunkinAssets.exists(path)) {
 			trace('[FoxLite > FoxGLTFLoader]: Could not load "$name" (Not found.)');
 			return null;
 		}
 		
-		var glb:ByteArray = Assets.getBytes(path);
+		var glb:ByteArray = FunkinAssets.getBytes(path);
 		if(glb == null) {
 			trace('[FoxLite > FoxGLTFLoader]: Could not load "$name" (Load error.)');
 			return null;

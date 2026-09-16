@@ -1,7 +1,7 @@
 package foxlite.loaders;
 
 import haxe.Json;
-import openfl.utils.Assets;
+import funkin.FunkinAssets;
 
 class FoxLoaderUtil {
 
@@ -23,7 +23,7 @@ class FoxLoaderUtil {
 
 	public static #if !foxlite_polymod dynamic #end function jsonPath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/data/$name.json';
-		return PathsClass.getPath('data/$name.json');
+		return PathsClass.getPath('data/$name.json', null, true);
 	}
 
 	public static #if !foxlite_polymod dynamic #end function filePath(name:String):String {
@@ -33,17 +33,17 @@ class FoxLoaderUtil {
 
 	public static #if !foxlite_polymod dynamic #end function imagePath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/images/$name.png';
-		return PathsClass.getPath('images/$name.png');
+		return PathsClass.image('$name');
 	}
 
 	public static #if !foxlite_polymod dynamic #end function shaderVert(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/shaders/$name.vert';
-		return PathsClass.getPath('shaders/$name.vert');
+		return PathsClass.vertex('$name');
 	}
 
 	public static #if !foxlite_polymod dynamic #end function shaderFrag(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/shaders/$name.frag';
-		return PathsClass.getPath('shaders/$name.frag');
+		return PathsClass.fragment('$name');
 	}
 
 	public static #if !foxlite_polymod dynamic #end function shaderIncludeRoot(name:String):String {
@@ -52,14 +52,14 @@ class FoxLoaderUtil {
 
 	public static function loadJSON(name:String):Dynamic {
 		var path = filePath(name);
-		if(!Assets.exists(path)) return null;
-		return Json.parse(Assets.getText(path));
+		if(!FunkinAssets.exists(path)) return null;
+		return Json.parse(FunkinAssets.getContent(path));
 	}
 
 	public static function loadText(name:String):String {
 		var path = filePath(name);
-		if(!Assets.exists(path)) return null;
-		return Assets.getText(path);
+		if(!FunkinAssets.exists(path)) return null;
+		return FunkinAssets.getContent(path);
 	}
 	
 	/**
