@@ -60,7 +60,7 @@ class FoxOrbitCamera extends FoxFPSCamera {
 		else curDistance = distance;
 
 		// We can offset our Z view after it's been calculated, makes things ridiculously easy
-		viewMatrix.appendTranslation(0, 0, -distance);
+		viewMatrix.appendTranslation(0, 0, -curDistance);
 		// Since we're just offseting distances we kinda don't need to recalculate inverse directions, probably
 	}
 }
