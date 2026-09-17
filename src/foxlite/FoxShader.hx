@@ -13,7 +13,9 @@ import haxe.ds.StringMap;
 import lime.graphics.WebGLRenderContext;
 import lime.math.Vector2;
 import lime.utils.Float32Array;
-import openfl.Assets;
+
+import funkin.FunkinAssets;
+
 import openfl.display3D.Context3D;
 import openfl.display3D.Program3D;
 import openfl.geom.Matrix3D;
@@ -275,13 +277,13 @@ class FoxShader {
 		var vert:String = FoxLoaderUtil.shaderVert(name);
 		var frag:String = FoxLoaderUtil.shaderFrag(name);
 		
-		if(Assets.exists(vert)) vert = Assets.getText(vert);
+		if(FunkinAssets.exists(vert)) vert = FunkinAssets.getContent(vert);
 		else {
 			trace('[FoxLite > FoxShader]: Vertex source not found for $vert');
 			vert = "";
 		}
 
-		if(Assets.exists(frag)) frag = Assets.getText(frag);
+		if(FunkinAssets.exists(frag)) frag = FunkinAssets.getContent(frag);
 		else {
 			trace('[FoxLite > FoxShader]: Fragment source not found for $frag');
 			frag = "";

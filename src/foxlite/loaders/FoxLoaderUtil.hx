@@ -28,22 +28,22 @@ class FoxLoaderUtil {
 
 	public static #if !foxlite_polymod dynamic #end function filePath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/$name';
-		return PathsClass.getPath('$name');
+		return PathsClass.getPath('$name', null, true);
 	}
 
 	public static #if !foxlite_polymod dynamic #end function imagePath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/images/$name.png';
-		return PathsClass.image('$name');
+		return PathsClass.image('$name', null, true);
 	}
 
 	public static #if !foxlite_polymod dynamic #end function shaderVert(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/shaders/$name.vert';
-		return PathsClass.vertex('$name');
+		return PathsClass.vertex('$name', null, true);
 	}
 
 	public static #if !foxlite_polymod dynamic #end function shaderFrag(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/shaders/$name.frag';
-		return PathsClass.fragment('$name');
+		return PathsClass.fragment('$name', null, true);
 	}
 
 	public static #if !foxlite_polymod dynamic #end function shaderIncludeRoot(name:String):String {

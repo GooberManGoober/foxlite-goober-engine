@@ -8,7 +8,9 @@ import foxlite.renderer.FoxRenderer;
 import foxlite.texture.FoxMipFilter;
 import foxlite.texture.FoxTextureFilter;
 import foxlite.texture.FoxWrapMode;
-import openfl.Assets;
+
+import funkin.FunkinAssets;
+
 import openfl.display.BitmapData;
 import openfl.display3D.Context3D;
 import openfl.display3D.Context3DTextureFormat;
@@ -159,7 +161,7 @@ class FoxTexture {
 		if(FoxCache.textures().exists(name)) return FoxCache.textures().get(name);
 		
 		var isDataUrl = StringTools.startsWith(name, "data:");
-		if(!Assets.exists(name) && !isDataUrl) {
+		if(!FunkinAssets.exists(name) && !isDataUrl) {
 			trace('[Foxlite > FoxTexture]: Could not load image: ${name} (Not found.)');
 			return null;
 		}
@@ -170,7 +172,7 @@ class FoxTexture {
 			data = BitmapData.fromBase64(components[1], components[0].substr(5, components[0].indexOf(';base64')-5));
 		} 
 		else {
-			data = Assets.getBitmapData(name, false #if cne , false #end);
+			data = FunkinAssets.getBitmapData(name, false #if cne , false #end);
 		}
 
 		if(data == null) {
