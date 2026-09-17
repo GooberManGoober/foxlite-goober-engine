@@ -286,9 +286,12 @@ class FoxMathUtil {
 
 		__Note:__ This expects the quaternion vector to be normalized.
 	**/
-	public static function eulerFromQuaternion(quat:Vector3D, ?output:Vector3D):Vector3D {
+	public inline static function eulerFromQuaternion(quat:Vector3D, ?output:Vector3D):Vector3D {
+		return eulerFromQuaternionComponent(quat.x, quat.y, quat.z, quat.w, output);
+	}
+
+	public static function eulerFromQuaternionComponent(x:Float, y:Float, z:Float, w:Float, ?output:Vector3D):Vector3D {
 		var e = output ?? new Vector3D();
-		var x:Float = quat.x, y:Float = quat.y, z:Float = quat.z, w:Float = quat.w;
 
 		var m0 = 1 - 2 * y * y - 2 * z * z,
 			m4 = 2 * x * y - 2 * w * z,
@@ -324,21 +327,25 @@ class FoxMathUtil {
 		return output;
 	}
 
+	public inline static function quaternionFromEuler(rot:Vector3D, ?output:Vector3D):Vector3D {
+		return quaternionFromEulerComponent(rot.x, rot.y, rot.z, output);
+	}
+
 	/**
 		From OpenFL's Matrix3D.recompose(EULER_ANGLES) -> decompose(QUATERNION), allocationless.
 	**/
-	public static function quaternionFromEuler(rot:Vector3D, ?output:Vector3D):Vector3D {
+	public static function quaternionFromEulerComponent(x:Float, y:Float, z:Float, ?output:Vector3D):Vector3D {
 		if(output == null) {
 			output = new Vector3D();
 			FoxRenderer.allocationsThisFrame += 1;
 		}
 		// Euler -> Matrix
-		var cx = Math.cos(rot.x);
-		var cy = Math.cos(rot.y);
-		var cz = Math.cos(rot.z);
-		var sx = Math.sin(rot.x);
-		var sy = Math.sin(rot.y);
-		var sz = Math.sin(rot.z);
+		var cx = Math.cos(x);
+		var cy = Math.cos(y);
+		var cz = Math.cos(z);
+		var sx = Math.sin(x);
+		var sy = Math.sin(y);
+		var sz = Math.sin(z);
 
 		var mr0 = cy * cz;
 		var mr1 = cy * sz;

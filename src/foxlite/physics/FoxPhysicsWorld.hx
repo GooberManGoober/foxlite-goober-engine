@@ -7,7 +7,11 @@ import box3d.Box3D;
 import box3d.Box3DTypes.B3WorldDef;
 import box3d.Box3DTypes.B3WorldId;
 
+import lime.system.CFFIPointer;
+
 import foxlite.FoxBasic;
+import foxlite.physics.util.Box3DUtil;
+import flixel.FlxG;
 
 class FoxPhysicsWorld extends FoxBasic {
 
@@ -18,6 +22,10 @@ class FoxPhysicsWorld extends FoxBasic {
 		For a consistant and performant physics simulation, a fixed rate is used
 		always regardless of framerate. This is 50hz by default, but you can change
 		it if you need it.
+
+		__Note:__ Setting this value above the game framerate will cause physics updates
+		to be called more than once per frame, it's better to keep this value
+		under 100 ticks per second and use physics interpolation instead.
 	**/
 	public var updateRate:Int = 50;
 
@@ -45,6 +53,9 @@ class FoxPhysicsWorld extends FoxBasic {
 
 	var elapsedTime:Float = 0;
 
+	public var timeSinceLastStep:Float = 0;
+	public var currentTime:Float = 0;
+
 	/**
 		Creates a new physics world for physics simulation.
 
@@ -55,15 +66,24 @@ class FoxPhysicsWorld extends FoxBasic {
 		@param threads If set more than 1, simulation will be multithreaded, this will improve performance substantially
 		but will take more memory.
 	**/
-	public function new(gravity:Vector3D, sleep:Bool=false, continuousDetection:Bool=true, threads:UInt=1) {
+	public function new(gravity:Vector3D=null, sleep:Bool=false, continuousDetection:Bool=true, threads:UInt=1) {
 		super();
 		if(gravity == null) gravity = new Vector3D(0, -9.81, 0);
 		world = Box3D.defaultWorldDef();
-		worldId = Box3D.createWorld(world);
-		setGravityVector(gravity);
 		world.enableSleep = sleep;
 		world.enableContinuous = continuousDetection;
 		world.workerCount = 1;
+		world.gravity.x = gravity.x;
+		world.gravity.y = gravity.y;
+		world.gravity.z = gravity.z;
+		
+		worldId = Box3D.createWorld(world);
+		Box3D.world_SetUserData(worldId, new CFFIPointer(this)); // Gather this FoxPhysicsWorld back from Box3D
+	}
+
+	public static function staticInit() {
+		var version = Box3D.getVersion();
+		trace('[FoxLite > FoxPhysicsWorld]: Initialized Box3D version ${version.major}.${version.minor} rev. ${version.revision}');
 	}
 
 	/**
@@ -86,6 +106,7 @@ class FoxPhysicsWorld extends FoxBasic {
 			elapsedTime -= rateMs;
 			Box3D.world_Step(worldId, timeStep, subSteps);
 			if(onPhysicsUpdate != null) onPhysicsUpdate(timeStep);
+			timeSinceLastStep = currentTime; // add subticks to this aswell?
 			++it;
 		}
 		return it;
@@ -93,26 +114,22 @@ class FoxPhysicsWorld extends FoxBasic {
 
 	public override function update(dt:Float) {
 		super.update(dt);
+		currentTime += dt;
 		step(dt);
 	}
 
 	public inline function setGravity(x:Float=0, y:Float=-9.81, z:Float=0) {
-		world.gravity.x = x;
-		world.gravity.y = y;
-		world.gravity.z = z;
+		Box3D.world_SetGravity(worldId, Box3DUtil.toB3Vec3(new Vector3D(x, y, z)));
 	}
 
 	public function setGravityVector(gravity:Vector3D) {
-		setGravity(gravity.x, gravity.y, gravity.z);
+		Box3D.world_SetGravity(worldId, Box3DUtil.toB3Vec3(gravity));
 	}
 
 	public function getGravity(?output:Vector3D):Vector3D {
 		if(output == null) output = new Vector3D();
-		output.setTo(
-			world.gravity.x,
-			world.gravity.y,
-			world.gravity.z
-		);
+		var g = Box3D.world_GetGravity(worldId);
+		output.setTo(g.x, g.y, g.z);
 		return output;
 	}
 
