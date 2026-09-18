@@ -9,7 +9,7 @@ import openfl.display3D.textures.CubeTexture;
 
 class FoxTextureCubemap extends FoxTexture {
 
-	public function setSideFromBitmapData(data:BitmapData, side:FoxCubemapSide, format:Context3DTextureFormat=#if !foxlite_polymod Context3DTextureFormat.BGRA #else 1 #end, mipmaps:Bool=false) {
+	public function setSideFromBitmapData(data:BitmapData, side:FoxCubemapSide, format:Context3DTextureFormat=Context3DTextureFormat.BGRA, mipmaps:Bool=false) {
 		var tex:CubeTexture;
 		if(glTexture == null) {
 			glTexture = context.createCubeTexture(data.width, format, false, 0);

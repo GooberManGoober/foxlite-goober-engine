@@ -4,9 +4,9 @@ import foxlite.animation.FoxTrackType;
 import foxlite.animation.data.FoxTrackData;
 import flixel.tweens.FlxEase;
 
-class FoxAnimationTrack #if !foxlite_polymod <T> #end {
-	public var name #if !foxlite_polymod (default, null) #end :String;
-	public var type #if !foxlite_polymod (default, null) #end :FoxTrackType;
+class FoxAnimationTrack<T> {
+	public var name(default, null):String;
+	public var type(default, null):FoxTrackType;
 	public var frames:Array<FoxKeyframe<T>> = [];
 
 	public function new(trackName:String, _type:FoxTrackType):Void {
@@ -14,12 +14,8 @@ class FoxAnimationTrack #if !foxlite_polymod <T> #end {
 		type = _type;
 	}
 
-	public function addFrame(time:Float, value:T, easing:FoxEaseType=#if !foxlite_polymod FoxEaseType.LINEAR #else 0 #end) {
-		#if foxlite_polymod
-		frames.push(new FoxKeyframe(time, value, easing));
-		#else
+	public function addFrame(time:Float, value:T, easing:FoxEaseType=FoxEaseType.LINEAR) {
 		frames.push(new FoxKeyframe<T>(time, value, easing));
-		#end
 	}
 
 	public function addFrames(times:Array<Float>, values:Array<T>, ?easings:Array<FoxEaseType>) {

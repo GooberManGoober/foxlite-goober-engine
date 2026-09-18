@@ -96,15 +96,7 @@ class FoxVertexBuffer {
 	public function updateFromTypedArray(data:ArrayBufferView, byteOffset:Int=0) {
 		var gl = context.gl;
 		context.__bindGLArrayBuffer(id);
-		#if foxlite_polymod
-		#if lime_webgl
-		GL.bufferSubDataWEBGL(gl.ARRAY_BUFFER, byteOffset, data);
-		#else
-		GL.bufferSubData(gl.ARRAY_BUFFER, byteOffset, data.length*bytesPerElement, DataPointer.fromArrayBufferView(data));
-		#end
-		#else
 		gl.bufferSubData(gl.ARRAY_BUFFER, byteOffset, data);
-		#end
 	}
 
 	public function dispose() {

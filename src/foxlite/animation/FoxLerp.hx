@@ -1,9 +1,8 @@
 package foxlite.animation;
 
 import flixel.math.FlxMath;
-#if !foxlite_polymod
 import flixel.util.FlxColor;
-#end
+
 import foxlite.math.FoxMathUtil;
 import foxlite.renderer.FoxRenderer;
 import lime.math.Vector2;
@@ -45,9 +44,6 @@ class FoxLerp {
 		Format follows FlxColor's ARGB
 	**/
 	public inline static function lerpColorHex(a:FlxColor, b:FlxColor, w:Float):FlxColor {
-		#if (foxlite_polymod || cne)
-		return FlxColor.interpolate(a, b, w);
-		#else
 		var x1 = (a >> 16) & 0xFF;
 		var y1 = (a >>  8) & 0xFF;
 		var z1 =  a & 0xFF;
@@ -63,7 +59,6 @@ class FoxLerp {
 		z1 += Std.int((z2 - z1) * w);
 		w1 += Std.int((w2 - w1) * w);
 		return w1 << 24 | x1 << 16 | y1 << 8 | z1;
-		#end
 	}
 
 	public static function inverseLerp(a:Float, b:Float, v:Float):Float {

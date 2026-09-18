@@ -1,7 +1,6 @@
 package foxlite;
 
 // For future implementation: Used in FoxModel and FoxObjectGroup
-#if !foxlite_polymod
 interface IFoxCullable {
 	/**
 		If enabled, this will perform frustum culling, meaning this object will disable its rendering when it's not
@@ -37,4 +36,3 @@ interface IFoxCullable {
 	**/
 	//public var perMeshCulling:Bool = false;
 }
-#end

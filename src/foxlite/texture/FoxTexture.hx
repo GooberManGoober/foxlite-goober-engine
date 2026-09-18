@@ -62,7 +62,7 @@ class FoxTexture {
 	private var __format:String = null;
 	private var __type:String = null;
 
-	public function new(wrapMode:FoxWrapMode=#if !foxlite_polymod FoxWrapMode.CLAMP #else 0 #end, filter:FoxTextureFilter=#if !foxlite_polymod FoxTextureFilter.LINEAR #else 4 #end, mipFilter:FoxMipFilter=#if !foxlite_polymod FoxMipFilter.MIPNONE #else 2 #end) {
+	public function new(wrapMode:FoxWrapMode=FoxWrapMode.CLAMP, filter:FoxTextureFilter=FoxTextureFilter.LINEAR, mipFilter:FoxMipFilter=FoxMipFilter.MIPNONE) {
 		FoxRenderer.allocationsThisFrame += 1;
 		context = FoxRenderer.getContext();
 		this.wrapMode = wrapMode;
@@ -132,7 +132,7 @@ class FoxTexture {
 		glTexture = null;
 	}
 
-	public static function fromBitmapData(data:BitmapData, format:Context3DTextureFormat=#if !foxlite_polymod Context3DTextureFormat.BGRA #else 1 #end, mipmaps:Bool=false, ?params:{?wrapMode:FoxWrapMode, ?filter:FoxTextureFilter, ?mipFilter:FoxMipFilter}):FoxTexture {
+	public static function fromBitmapData(data:BitmapData, format:Context3DTextureFormat=Context3DTextureFormat.BGRA, mipmaps:Bool=false, ?params:{?wrapMode:FoxWrapMode, ?filter:FoxTextureFilter, ?mipFilter:FoxMipFilter}):FoxTexture {
 		if(data == null) return null;
 		// TODO: Add compressed textures
 		var tex = FoxRenderer.getContext().createTexture(data.width, data.height, format, false);
@@ -150,14 +150,14 @@ class FoxTexture {
 	/**
 		Loads a `FoxTexture` from an image located in `images/` (with .png extension)
 	**/
-	public static function fromImage(name:String, mipmaps:Bool=false, format:Context3DTextureFormat=#if !foxlite_polymod Context3DTextureFormat.BGRA #else 1 #end, ?params:{?wrapMode:FoxWrapMode, ?filter:FoxTextureFilter, ?mipFilter:FoxMipFilter}):FoxTexture {
+	public static function fromImage(name:String, mipmaps:Bool=false, format:Context3DTextureFormat=Context3DTextureFormat.BGRA, ?params:{?wrapMode:FoxWrapMode, ?filter:FoxTextureFilter, ?mipFilter:FoxMipFilter}):FoxTexture {
 		return fromImageRaw(FoxLoaderUtil.imagePath(name), mipmaps, format, params);
 	}
 	
 	/**
 		Loads a `FoxTexture` using a full raw asset path (including extension)
 	**/
-	public static function fromImageRaw(name:String, mipmaps:Bool=false, format:Context3DTextureFormat=#if !foxlite_polymod Context3DTextureFormat.BGRA #else 1 #end, ?params:{?wrapMode:FoxWrapMode, ?filter:FoxTextureFilter, ?mipFilter:FoxMipFilter}):FoxTexture {
+	public static function fromImageRaw(name:String, mipmaps:Bool=false, format:Context3DTextureFormat=Context3DTextureFormat.BGRA, ?params:{?wrapMode:FoxWrapMode, ?filter:FoxTextureFilter, ?mipFilter:FoxMipFilter}):FoxTexture {
 		if(FoxCache.textures().exists(name)) return FoxCache.textures().get(name);
 		
 		var isDataUrl = StringTools.startsWith(name, "data:");
@@ -172,7 +172,7 @@ class FoxTexture {
 			data = BitmapData.fromBase64(components[1], components[0].substr(5, components[0].indexOf(';base64')-5));
 		} 
 		else {
-			data = FunkinAssets.getBitmapData(name, false #if cne , false #end);
+			data = FunkinAssets.getBitmapData(name, false);
 		}
 
 		if(data == null) {

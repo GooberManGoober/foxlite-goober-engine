@@ -58,7 +58,7 @@ import openfl.display.BitmapData;
 import openfl.display3D.textures.Texture;
 
 @dox(hide)
-@:noCompletion #if !foxlite_polymod abstract #else class #end AccessorComponentType #if !foxlite_polymod (Int) from Int to Int #end {
+@:noCompletion abstract AccessorComponentType (Int) from Int to Int {
 	public inline static final BYTE = 5120;
 	public inline static final UNSIGNED_BYTE = 5121;
 	public inline static final SHORT = 5122;
@@ -68,13 +68,13 @@ import openfl.display3D.textures.Texture;
 }
 
 @dox(hide)
-@:noCompletion #if !foxlite_polymod abstract #else class #end BufferViewTarget #if !foxlite_polymod (Int) from Int to Int #end {
+@:noCompletion abstract BufferViewTarget (Int) from Int to Int {
 	public inline static final ARRAY_BUFFER = 34962;
 	public inline static final ELEMENT_ARRAY_BUFFER = 34963;
 }
 
 @dox(hide)
-@:noCompletion #if !foxlite_polymod abstract #else class #end PrimitiveMode #if !foxlite_polymod (Int) from Int to Int #end {
+@:noCompletion abstract PrimitiveMode (Int) from Int to Int {
 	public inline static final POINTS = 0;
 	public inline static final LINES = 1;
 	public inline static final LINE_LOOP = 2;
@@ -85,13 +85,13 @@ import openfl.display3D.textures.Texture;
 }
 
 @dox(hide)
-@:noCompletion #if !foxlite_polymod abstract #else class #end SamplerMagFilter #if !foxlite_polymod (Int) from Int to Int #end {
+@:noCompletion abstract SamplerMagFilter (Int) from Int to Int {
 	public inline static final NEAREST = 9728;
 	public inline static final LINEAR = 9729;
 }
 
 @dox(hide)
-@:noCompletion #if !foxlite_polymod abstract #else class #end SamplerMinFilter #if !foxlite_polymod (Int) from Int to Int #end {
+@:noCompletion abstract SamplerMinFilter (Int) from Int to Int {
 	public inline static final NEAREST = 9728;
 	public inline static final LINEAR = 9729;
 	public inline static final NEAREST_MIPMAP_NEAREST = 9984;
@@ -101,7 +101,7 @@ import openfl.display3D.textures.Texture;
 }
 
 @dox(hide)
-@:noCompletion #if !foxlite_polymod abstract #else class #end SamplerWrap #if !foxlite_polymod (Int) from Int to Int #end {
+@:noCompletion abstract SamplerWrap (Int) from Int to Int {
 	public inline static final CLAMP_TO_EDGE = 33071;
 	public inline static final MIRRORED_REPEAT = 33648;
 	public inline static final REPEAT = 10497;
@@ -133,9 +133,6 @@ class FoxGLTFLoader {
 	public static function load(name:String, ?extraShaderFlags:Array<String>, ?customShaderPath:String):GLTFData {
 		var dir:String = Path.directory(name) + '/';
 		trace('[FoxLite > FoxGLTFLoader]: Attempting to load model from $dir.');
-
-		if(FunkinAssets.exists(dir)) trace('[FoxLite > FoxGLTFLoader]: Model Path does exist.');
-		else trace('[FoxLite > FoxGLTFLoader]: Model Path does NOT exist.');
 
 		var gltfJson:Dynamic = FoxLoaderUtil.loadJSON(name);
 		if(gltfJson == null) {
@@ -553,10 +550,6 @@ class FoxGLTFLoader {
 		// Skinning
 		if(gltfJson.skins != null && skins.length == 0) {
 			// Temporary vectors for Quaternion -> Euler conversion
-			#if foxlite_polymod
-			var tempMatrix = new Matrix3D();
-			var tempVectors = tempMatrix.decompose().__array;
-			#end
 			for(skin in (gltfJson.skins:Array<Dynamic>)) {
 				var accessor:Dynamic = null;
 				var view:Dynamic = null;
@@ -589,20 +582,7 @@ class FoxGLTFLoader {
 					bone.name = node.name;
 					if(Std.isOfType(node.translation, Array)) bone.setPosition(node.translation[0], node.translation[1], node.translation[2]);
 					if(Std.isOfType(node.scale, Array)) bone.setScale(node.scale[0], node.scale[1], node.scale[2]);
-					if(Std.isOfType(node.rotation, Array)) {
-						#if foxlite_polymod
-						// Rotations are stored as quaternions, we have to turn them into euler angles
-						tempVectors[1].setTo(node.rotation[0], node.rotation[1], node.rotation[2]);
-						tempVectors[1].w = node.rotation[3];
-
-						tempMatrix.recompose(tempVectors, cast 2);
-						FoxMathUtil.eulerFromMatrix(tempMatrix, bone.rotation);
-						#else
-						bone.rotation.setTo(node.rotation[0], node.rotation[1], node.rotation[2]);
-						bone.rotation.w = node.rotation[3];
-						FoxMathUtil.eulerFromQuaternion(bone.rotation, bone.rotation);
-						#end
-					}
+					if(Std.isOfType(node.rotation, Array)) {}
 					skinData.addBone(bone, -1);
 					skinData.reparentBoneByName(idx, nodes[parent[joint]]?.name ?? "");
 				}

@@ -2,7 +2,7 @@ package foxlite.material;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-#if !foxlite_polymod abstract #else class #end FoxDepthCompareMode #if !foxlite_polymod (Int) from Int to Int #end {
+abstract FoxDepthCompareMode(Int) from Int to Int {
 	/**
 		The comparison always evaluates as true.
 	**/

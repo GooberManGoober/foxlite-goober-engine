@@ -3,9 +3,6 @@ package foxlite.skin;
 import foxlite.FoxModel;
 import foxlite.group.FoxObjectGroup;
 import foxlite.skin.FoxSkinData;
-#if foxlite_polymod
-import foxlite.funkin.PolymodUtils;
-#end
 
 /**
 	An easy way of managing armatures for model groups
@@ -29,11 +26,7 @@ class FoxArmature extends FoxObjectGroup {
 	public function checkModel(member:FoxObject):FoxObject {
 		if(member == null) return null;
 		var model:FoxModel = cast member; // Check skin
-		#if foxlite_polymod
-		if(PolymodUtils.instanceHasField(model, "skin")) model.skin = skin;
-		#else
 		if(Std.isOfType(model, FoxModel)) model.skin = skin;
-		#end
 		return member;
 	}
 

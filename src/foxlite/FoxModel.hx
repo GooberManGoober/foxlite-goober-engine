@@ -14,7 +14,7 @@ import openfl.display3D.Context3D;
 import openfl.geom.Matrix3D;
 import foxlite.culling.BoundingBox;
 
-class FoxModel extends FoxObject #if !foxlite_polymod implements IFoxCullable #end {
+class FoxModel extends FoxObject implements IFoxCullable {
 
 	public var layers:FoxLayer;
 

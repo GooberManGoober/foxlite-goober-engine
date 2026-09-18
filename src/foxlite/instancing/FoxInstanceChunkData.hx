@@ -15,7 +15,7 @@ class FoxInstanceChunkData {
 	public var bytes:Bytes;
 
 	public inline function setFloat(pos:Int, v:Float):Void {
-		#if (js || !foxlite_polymod)
+		#if js
 		buffer[pos] = v;
 		#else
 		bytes.setFloat(pos<<1, v);
@@ -23,7 +23,7 @@ class FoxInstanceChunkData {
 	}
 
 	public inline function getFloat(pos:Int):Float {
-		#if (js || !foxlite_polymod)
+		#if js
 		return buffer[pos];
 		#else
 		return bytes.getFloat(pos<<1);

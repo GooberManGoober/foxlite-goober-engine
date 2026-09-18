@@ -2,7 +2,7 @@ package foxlite.mesh.buffer;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-#if !foxlite_polymod abstract #else class #end FoxVertexBufferType #if !foxlite_polymod (Int) from Int to Int #end {
+abstract FoxVertexBufferType(Int) from Int to Int {
 	public inline static final VERTICES = 0;
 	public inline static final UVS = 1;
 	public inline static final NORMALS = 2;

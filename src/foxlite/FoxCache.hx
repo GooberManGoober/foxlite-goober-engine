@@ -8,7 +8,6 @@ import foxlite.mesh.FoxMesh;
 import foxlite.texture.FoxTexture;
 import foxlite.skin.FoxSkinData;
 
-#if !foxlite_polymod
 @dox(hide) typedef FoxTextureCollection = Map<String, FoxTexture>;
 @dox(hide) typedef FoxShaderCollection = Map<String, FoxShader>;
 @dox(hide) typedef FoxShaderDefinesCollection = Map<String, String>;
@@ -16,7 +15,6 @@ import foxlite.skin.FoxSkinData;
 @dox(hide) typedef FoxMeshCollection = Map<String, Array<FoxMesh>>;
 @dox(hide) typedef FoxAnimationCollection = Map<String, Map<String, FoxAnimation>>;
 @dox(hide) typedef FoxSkinCollection = Map<String, Array<FoxSkinData>>;
-#end
 
 class FoxCache {
 
@@ -37,11 +35,7 @@ class FoxCache {
 
 	public function new() {}
 
-	public static inline function staticInit() {
-		#if foxlite_polymod
-		trace(instance);
-		#end
-	}
+	public static inline function staticInit() {}
 
 	public static inline function textures():FoxTextureCollection {
 		return FoxCache.instance._texture;

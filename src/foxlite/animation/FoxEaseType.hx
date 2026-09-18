@@ -2,7 +2,7 @@ package foxlite.animation;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-#if !foxlite_polymod abstract #else class #end FoxEaseType #if !foxlite_polymod (Int) from Int to Int #end {
+abstract FoxEaseType(Int) from Int to Int {
 	// Default godot ease
 	public inline static final LINEAR = 0;
 	public inline static final QUAD_IN = 1;

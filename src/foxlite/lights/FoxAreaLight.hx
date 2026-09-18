@@ -27,7 +27,7 @@ class FoxAreaLight extends FoxPointLight {
 		return Std.int(Math.max(this.sdfData.w, 0));
 	}
 
-	public function new(x:Float=0, y:Float=0, z:Float=0, color:FlxColor=0xFFFFFFFF, energy:Float=1, shape:FoxAreaLightShape= #if !foxlite_polymod FoxAreaLightShape.BOX #else 1 #end, range:Float=5, attenuation:Float=1, shadow:Bool=false) {
+	public function new(x:Float=0, y:Float=0, z:Float=0, color:FlxColor=0xFFFFFFFF, energy:Float=1, shape:FoxAreaLightShape=FoxAreaLightShape.BOX, range:Float=5, attenuation:Float=1, shadow:Bool=false) {
 		super(x, y, z, color, energy, range, attenuation, shadow);
 		name = "FoxAreaLight";
 		FoxRenderer.allocationsThisFrame += 2;

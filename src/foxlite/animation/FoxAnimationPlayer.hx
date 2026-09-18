@@ -65,7 +65,7 @@ class FoxAnimationPlayer extends FoxAnimationLinker {
 		If enabled, will ensure the animation plays smoothly if keyframes are too close together.
 		For more details, check `fineTune()`. Disable this if performance is unacceptable.
 	**/
-	public var fineTuned:Bool = #if !foxlite_polymod true; #else false; #end
+	public var fineTuned:Bool = true;
 
 	var __reset:Bool = false;
 	var __playFrame:Bool = true;

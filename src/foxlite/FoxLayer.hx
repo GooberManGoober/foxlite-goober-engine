@@ -19,7 +19,7 @@
 
 package foxlite;
 
-#if !foxlite_polymod abstract #else class #end FoxLayer #if !foxlite_polymod (Int) from Int to Int #end {
+abstract FoxLayer(Int) from Int to Int {
 
 	public inline static final ALL:Int = 0xFFFFFFFF; // precomputed hash for get([0...31])
 

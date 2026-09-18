@@ -15,7 +15,6 @@ import foxlite.skin.FoxBone;
 import lime.utils.Float32Array;
 import openfl.geom.Matrix3D;
 import openfl.geom.Vector3D;
-import openfl.utils.Assets;
 import foxlite.animation.FoxAnimation;
 
 class FoxSkinData {

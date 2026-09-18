@@ -1,7 +1,7 @@
 package foxlite.physics;
 
 #if lime_box3d
-#if !foxlite_polymod abstract #else class #end FoxPhysicsBodyType #if !foxlite_polymod (Int) from Int to Int #end {
+abstract FoxPhysicsBodyType(Int) from Int to Int {
 
 	/**
 		This body will become an immovable object by physics.

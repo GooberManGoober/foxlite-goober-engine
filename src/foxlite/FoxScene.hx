@@ -97,7 +97,7 @@ class FoxScene extends FoxExtendableSprite {
 	* Draw groups are meant to be used for post-processing, offscreen rendering and shadow passes. 
 	* For example rendering a single mesh to a noise texture and then using that texture in the next group.
 	*/
-	public var drawGroups #if !foxlite_polymod : Array<FoxDrawTree> #end = [new BalancedTree()];
+	public var drawGroups:Array<FoxDrawTree> = [new BalancedTree()];
 
 	public var __width:Float = 0;
 	public var __height:Float = 0;

@@ -2,7 +2,7 @@ package foxlite.stencil;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-#if !foxlite_polymod abstract #else class #end FoxStencilActionType #if !foxlite_polymod (Int) from Int to Int #end {
+abstract FoxStencilActionType(Int) from Int to Int {
 	/**
 		Decrement the stencil buffer value, clamping at 0, the minimum value.
 	**/
