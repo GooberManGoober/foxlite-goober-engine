@@ -153,6 +153,7 @@ class FoxModel extends FoxObject #if !foxlite_polymod implements IFoxCullable #e
 
 	public override function update(dt:Float) {
 		if(FoxRenderer.calculateMotionVectors) __prevTransform.copyRawDataFrom(transform.rawData);
+		if(skin != null) skin.needsUpdate = true; // Request updating for the armature
 		super.update(dt);
 	}
 
