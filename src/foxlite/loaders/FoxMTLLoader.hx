@@ -174,7 +174,14 @@ class FoxMTLLoader {
 	@:noCompletion public static function _loadTexture(name:String):FoxTexture {
 		// Check if image exists relative to our model
 		var relPath = FoxLoaderUtil.filePath(name);
-		var tex:FoxTexture = FoxTexture.fromImageRaw(relPath);
+		var tex:FoxTexture = null;
+		#if cne
+		if(Assets.exists(relPath)) tex = FoxTexture.fromImageRaw(relPath);
+		// Nothing, load from `images/`
+		else tex = FoxTexture.fromImage(Path.withoutExtension(name));
+		#else
+		tex = FoxTexture.fromImageRaw(relPath);
+		#end
 		if(tex != null) {
 			tex.wrapMode = FoxWrapMode.REPEAT;
 		}

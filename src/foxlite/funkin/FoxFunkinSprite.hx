@@ -5,8 +5,11 @@ import foxlite.flixel.FoxFlxSprite;
 import foxlite.material.FoxMaterial;
 import foxlite.material.FoxTriangleFace;
 import foxlite.mesh.buffer.FoxVertexBufferType;
-
-import funkin.objects.FunkinSprite;
+#if (foxlite_polymod || polymod)
+import funkin.graphics.FunkinSprite;
+#else
+typedef FunkinSprite = Dynamic; // Keep haxe happy
+#end
 
 /**
 	Use your funkin sprites in the 3D renderer!

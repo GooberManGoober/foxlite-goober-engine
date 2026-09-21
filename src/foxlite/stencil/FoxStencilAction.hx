@@ -62,13 +62,13 @@ class FoxStencilAction {
 	public var referenceValueId:Int = 0;
 	public var actionId:Int = 0;
 
-	public function new(refValue:Int=0, readMask:Int=0x0, writeMask:Int=0xFF, compare:FoxStencilCompareMode=FoxStencilCompareMode.ALWAYS, onFail:FoxStencilActionType=FoxStencilActionType.KEEP, onDepthFail:FoxStencilActionType=FoxStencilActionType.KEEP, onBothPass:FoxStencilActionType=FoxStencilActionType.KEEP, face:FoxTriangleFace=FoxTriangleFace.FRONT_AND_BACK) {
+	public function new(refValue:Int=0, readMask:Int=0x0, writeMask:Int=0xFF, compare:FoxStencilCompareMode=FoxStencilCompareMode.ALWAYS, onFail:FoxStencilActionType=#if !foxlite_polymod FoxStencilActionType.KEEP #else 5 #end, onDepthFail:FoxStencilActionType=#if !foxlite_polymod FoxStencilActionType.KEEP #else 5 #end, onBothPass:FoxStencilActionType=#if !foxlite_polymod FoxStencilActionType.KEEP #else 5 #end, face:FoxTriangleFace=#if !foxlite_polymod FoxTriangleFace.FRONT_AND_BACK #else 2 #end) {
 		value = refValue;
 		setMask(face, readMask, writeMask);
 		setActions(compare, onFail, onDepthFail, onBothPass);
 	}
 
-	public function setMask(face:FoxTriangleFace=FoxTriangleFace.FRONT_AND_BACK, read:Int=0xFF, write:Int=0xFF) {
+	public function setMask(face:FoxTriangleFace=#if !foxlite_polymod FoxTriangleFace.FRONT_AND_BACK #else 2 #end, read:Int=0xFF, write:Int=0xFF) {
 		triangleFace = face;
 		readMask = read;
 		writeMask = write;
@@ -79,7 +79,7 @@ class FoxStencilAction {
 	/**
 		Sets the operations for this stencil action: fail, zfail, zpass
 	**/
-	public function setActions(compare:FoxStencilCompareMode=FoxStencilCompareMode.ALWAYS, onFail:FoxStencilActionType=FoxStencilActionType.KEEP, onDepthFail:FoxStencilActionType=FoxStencilActionType.KEEP, onBothPass:FoxStencilActionType=FoxStencilActionType.KEEP) {
+	public function setActions(compare:FoxStencilCompareMode=#if !foxlite_polymod FoxStencilCompareMode.ALWAYS #else 0 #end, onFail:FoxStencilActionType=#if !foxlite_polymod FoxStencilActionType.KEEP #else 5 #end, onDepthFail:FoxStencilActionType=#if !foxlite_polymod FoxStencilActionType.KEEP #else 5 #end, onBothPass:FoxStencilActionType=#if !foxlite_polymod FoxStencilActionType.KEEP #else 5 #end) {
 		compareMode = compare;
 		actionOnFail = onFail;
 		actionOnDepthFail = onDepthFail;

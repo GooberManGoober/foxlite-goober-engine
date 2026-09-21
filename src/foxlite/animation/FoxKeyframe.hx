@@ -2,7 +2,7 @@ package foxlite.animation;
 
 import foxlite.animation.FoxEaseType;
 
-class FoxKeyframe<T> {
+class FoxKeyframe #if !foxlite_polymod <T> #end {
 	public var time:Float;
 	public var ease:FoxEaseType;
 	public var value:T;

@@ -1,5 +1,8 @@
 package foxlite.polyfill;
 
+#if foxlite_polymod
+import lime.utils.ArrayBufferView; // HScript iris
+#end
 import lime.utils.Float32Array;
 import lime.utils.Float64Array;
 import lime.utils.Int16Array;
@@ -24,6 +27,45 @@ class TypedArray {
 	public static inline final Uint32 = 7;
 	public static inline final Float32 = 8;
 	public static inline final Float64 = 9;
+
+	#if foxlite_polymod
+	public inline static function Int8Array(data:Array<Int>):ArrayBufferView {
+		return new ArrayBufferView(0, Int8).initArray(data);
+	}
+
+	public inline static function Int16Array(data:Array<Int>):ArrayBufferView {
+		return new ArrayBufferView(0, Int16).initArray(data);
+	}
+
+	public inline static function Int32Array(data:Array<Int>):ArrayBufferView {
+		return new ArrayBufferView(0, Int32).initArray(data);
+	}
+
+	public inline static function UInt8Array(data:Array<Int>):ArrayBufferView {
+		return new ArrayBufferView(0, Uint8).initArray(data);
+	}
+
+	public inline static function UInt8ClampedArray(data:Array<Int>):ArrayBufferView {
+		return new ArrayBufferView(0, Uint8Clamped).initArray(data);
+	}
+
+	public inline static function UInt16Array(data:Array<Int>):ArrayBufferView {
+		return new ArrayBufferView(0, Uint16).initArray(data);
+	}
+
+	public inline static function UInt32Array(data:Array<Int>):ArrayBufferView {
+		return new ArrayBufferView(0, Uint32).initArray(data);
+	}
+	
+	public inline static function Float32Array(data:Array<Float>):ArrayBufferView {
+		return new ArrayBufferView(0, Float32).initArray(data);
+	}
+
+	public inline static function Float64Array(data:Array<Float>):ArrayBufferView {
+		return new ArrayBufferView(0, Float64).initArray(data);
+	}
+
+	#else 
 
 	public inline static function Int8Array(data:Array<Int>):Int8Array {
 		return new Int8Array(null, data);
@@ -60,4 +102,5 @@ class TypedArray {
 	public inline static function Float64Array(data:Array<Float>):Float64Array {
 		return new Float64Array(null, data);
 	}
+	#end
 }

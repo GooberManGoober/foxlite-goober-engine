@@ -162,7 +162,11 @@ class FoxLightData {
 		) + 5;
 	}
 
-	public static function staticInit() {}
+	public static function staticInit() {
+		#if foxlite_polymod
+		trace(MAX_AREA_LIGHTS, MAX_DIRECTIONAL_LIGHTS, MAX_POINT_LIGHTS, MAX_SPOT_LIGHTS);
+		#end
+	}
 
 	public function prepareLights(camera:FoxCamera) {
 		shadowLights.resize(0);

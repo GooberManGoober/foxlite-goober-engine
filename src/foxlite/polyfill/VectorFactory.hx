@@ -8,7 +8,9 @@ import flixel.graphics.tile.FlxDrawTrianglesItem; // Needed for: (openfl) Vector
 import openfl.geom.Matrix3D;
 import openfl.geom.Vector3D;
 
+#if !foxlite_polymod
 import openfl.Vector;
+#end
 
 // For openfl.Vector<Float>, Vector<Int> and Vector<Vector3D>
 // openfl.Vector or DrawData cannot be imported

@@ -10,7 +10,7 @@ class FoxTrackData {
 	public var frameIndex:Int = 0;
 	public var prevFrameIndex:Int = -1;
 	public var value:Any;
-	public var type(default, null):FoxTrackType;
+	public var type #if !foxlite_polymod (default, null) #end :FoxTrackType;
 
 	public function new(_type:FoxTrackType) {
 		value = FoxTrackData.getValueForType(_type);

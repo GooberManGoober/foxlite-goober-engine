@@ -15,6 +15,9 @@ import openfl.display3D.Context3D;
 import openfl.display3D.textures.Texture;
 import openfl.display3D.textures.CubeTexture;
 import openfl.errors.RangeError;
+#if foxlite_polymod
+import lime.utils.BytePointer;
+#end
 
 /**
 	A framebuffer that can be used as target for rendering.
@@ -180,7 +183,16 @@ class FoxFramebuffer {
 		mem.resize(width*height*4);
 		var buffer = TypedArray.UInt8Array(mem);
 
+		#if foxlite_polymod
+		#if lime_webgl
+		GL.readPixelsWEBGL(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
+		#else
+		var pointer = BytePointer.fromArrayBufferView(buffer);
+		GL.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pointer);
+		#end
+		#else
 		gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
+		#end
 		
 		return buffer;
 	}
@@ -206,7 +218,16 @@ class FoxFramebuffer {
 		mem.resize(width*height*4);
 		var buffer = TypedArray.Float32Array(mem);
 
+		#if foxlite_polymod
+		#if lime_webgl
+		GL.readPixelsWEBGL(x, y, width, height, gl.DEPTH_COMPONENT, gl.FLOAT, buffer);
+		#else
+		var pointer = BytePointer.fromArrayBufferView(buffer);
+		GL.readPixels(x, y, width, height, gl.DEPTH_COMPONENT, gl.FLOAT, pointer);
+		#end
+		#else
 		gl.readPixels(x, y, width, height, gl.DEPTH_COMPONENT, gl.FLOAT, buffer);
+		#end
 
 		return buffer;
 	}

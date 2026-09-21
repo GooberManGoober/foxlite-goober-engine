@@ -4,10 +4,13 @@ import foxlite.FoxBasic;
 import foxlite.FoxCamera;
 import foxlite.flixel.FlxTypedSignalImpl;
 import foxlite.renderer.FoxRenderer;
+#if foxlite_polymod
+import foxlite.funkin.PolymodUtils;
+#end
 /**
 	A very simple group implementation.
 **/
-class FoxTypedGroup<T:FoxBasic> extends FoxBasic {
+class FoxTypedGroup #if !foxlite_polymod <T:FoxBasic> #end extends FoxBasic {
 	
 	public var members:Array<T> = [];
 
@@ -96,7 +99,13 @@ class FoxTypedGroup<T:FoxBasic> extends FoxBasic {
 
 	public inline function forEach(func:(member:T) -> Void, recurse:Bool=false) {
 		for(m in members) if(m != null) {
-			if(recurse)  (cast m)?.forEach(func, recurse);
+			if(recurse) {
+				#if !foxlite_polymod
+				(cast m)?.forEach(func, recurse);
+				#else
+				if(PolymodUtils.instanceHasField(m, "forEach")) m.forEach(func, recurse);
+				#end
+			}
 			func(m);
 		}
 	}

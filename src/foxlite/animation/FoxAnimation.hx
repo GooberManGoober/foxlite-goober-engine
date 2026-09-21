@@ -54,7 +54,7 @@ class FoxAnimation {
 
 	public var duration(default, set):Float = 0;
 	public var loop:Bool = false;
-	public var name(default, null):String;
+	public var name #if !foxlite_polymod (default, null) #end:String;
 	public var assetsKey:String;
 
 	function set_duration(v:Float):Float {

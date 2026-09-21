@@ -14,6 +14,14 @@ class FoxIndexBuffer extends FoxVertexBuffer {
 	public override function updateFromTypedArray(data:ArrayBufferView, byteOffset:Int=0) {
 		var gl = context.gl;
 		context.__bindGLElementArrayBuffer(id);
+		#if foxlite_polymod
+		#if lime_webgl
+		GL.bufferSubDataWEBGL(gl.ELEMENT_ARRAY_BUFFER, byteOffset, data);
+		#else
+		GL.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, byteOffset, data.length*bytesPerElement, DataPointer.fromArrayBufferView(data));
+		#end
+		#else
 		gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, byteOffset, data);
+		#end
 	}
 }

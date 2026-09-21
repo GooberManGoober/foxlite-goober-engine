@@ -41,6 +41,9 @@ import openfl.display3D.textures.CubeTexture;
 import openfl.display3D.textures.Texture;
 import openfl.geom.Rectangle;
 import flixel.FlxG;
+#if foxlite_polymod
+import lime.utils.DataPointer;
+#end
 
 typedef FoxGLExtensions = {
 	?anisotropic:Dynamic,
@@ -155,6 +158,14 @@ class FoxRenderer {
 		window.alert(msg, "Get a GPU");
 		#end
 
+		#if foxlite_polymod
+		trace(BUILD_NAME, VERSION, renderContext, frameCount, drawCalls, verticesDrawn, stateSwitches, __blendMode, 
+			__depthTest, __shader, __stencilTest, renderMode, debugWireframe, mustRebuildDrawGroups, 
+			renderedInstances, onPreDraw, onPostDraw, __indexBuffer, __scissorTest, glDeviceName, MISSING_TEXTURE, 
+			MISSING_MATERIAL, MISSING_SHADER, initialized, __target, calculateMotionVectors, extensions, maxAnisotropy
+		);
+		#end
+		
 		FoxRenderer.renderContext = '${window.context.type}'.toUpperCase();
 		FoxRenderer.glDeviceName = gl.getParameter(gl.RENDERER);
 		trace('[FoxLite > FoxRenderer]: lime is ${renderContext} (${Std.string(GL.context)}):\n    - Shader model: ${GL.getParameter(context.gl.SHADING_LANGUAGE_VERSION)}\n    - Device: $glDeviceName');
@@ -259,7 +270,11 @@ class FoxRenderer {
 		This contains a `WebGLRenderContext`, meaning things can be limited
 	**/
 	public inline static function getContext() {
+		#if foxlite_polymod
+		context = FlxG.stage.context3D; // Good thing I used FlxG instead of Lib first, i didn't know it was blacklisted.
+		#else
 		context = openfl.Lib.current.stage.context3D;
+		#end
 		return context; 
 	}
 
@@ -267,7 +282,11 @@ class FoxRenderer {
 		Gets the current lime window the game is running on.
 	**/
 	public inline static function getWindow() {
+		#if foxlite_polymod
+		return FlxG.stage.window;
+		#else
 		return openfl.Lib.application.window;
+		#end
 	}
 
 	public inline static function getGLVersion() {
@@ -301,6 +320,10 @@ class FoxRenderer {
 		VectorFactory.staticInit();
 		FoxLightData.staticInit();
 		FoxShader.staticInit();
+		#if foxlite_polymod
+		trace(BoundingBox.__tempBounds);
+		trace(BoundingBox.__tempBounds2);
+		#end
 
 		#if lime_box3d
 		FoxPhysicsWorld.staticInit();

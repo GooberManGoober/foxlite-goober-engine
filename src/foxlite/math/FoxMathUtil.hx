@@ -63,6 +63,9 @@ class FoxMathUtil {
 	];
 
 	public static function staticInit() {
+		#if foxlite_polymod
+		trace(degToRad, radToDeg, RIGHT, UP, FORWARD, LEFT, DOWN, BACK, ZERO, ONE, TAU, PI_2, __tempVector, __tempVector2, __tempVector3, MATRIX_IDENTITY, MATRIX_DIRECTIONS);
+		#end
 		// Idk why some directions are inverted, but this seems to correspond to what foxlite uses
 		MATRIX_DIRECTIONS[FoxCubemapSide.RIGHT].pointAt(ZERO, RIGHT, DOWN);
 		MATRIX_DIRECTIONS[FoxCubemapSide.LEFT].pointAt(ZERO, LEFT, DOWN);

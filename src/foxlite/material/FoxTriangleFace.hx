@@ -2,7 +2,7 @@ package foxlite.material;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-abstract FoxTriangleFace(Int) from Int to Int {
+#if !foxlite_polymod abstract #else class #end FoxTriangleFace #if !foxlite_polymod (Int) from Int to Int #end {
 	public inline static final BACK = 0;
 	public inline static final FRONT = 1;
 	public inline static final FRONT_AND_BACK = 2;

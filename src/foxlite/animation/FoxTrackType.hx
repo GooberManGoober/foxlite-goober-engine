@@ -2,7 +2,7 @@ package foxlite.animation;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-abstract FoxTrackType(Int) from Int to Int {
+#if !foxlite_polymod abstract #else class #end FoxTrackType #if !foxlite_polymod (Int) from Int to Int #end {
 	public inline static final FLOAT = 0;
 	public inline static final INT = 1;
 	public inline static final ANGLE = 2;

@@ -2,7 +2,7 @@ package foxlite.lights;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-abstract FoxAreaLightShape(Int) from Int to Int {
+#if !foxlite_polymod abstract #else class #end FoxAreaLightShape #if !foxlite_polymod (Int) from Int to Int #end {
 	public inline static final SPHERE = 0;
 	public inline static final BOX = 1;
 	public inline static final TORUS = 2;

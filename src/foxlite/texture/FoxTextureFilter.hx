@@ -2,7 +2,7 @@ package foxlite.texture;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-abstract FoxTextureFilter(Int) from Int to Int {
+#if !foxlite_polymod abstract #else class #end FoxTextureFilter #if !foxlite_polymod (Int) from Int to Int #end {
 	/**
 		Use anisotropic filter with radio 16 when upsampling textures
 	**/

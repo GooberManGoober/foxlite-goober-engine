@@ -2,7 +2,7 @@ package foxlite.texture;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-abstract FoxWrapMode(Int) from Int to Int {
+#if !foxlite_polymod abstract #else class #end FoxWrapMode #if !foxlite_polymod (Int) from Int to Int #end {
 	/**
 		Clamp texture coordinates outside the 0..1 range.
 

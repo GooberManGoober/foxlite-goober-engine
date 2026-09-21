@@ -8,6 +8,9 @@ import lime.math.Vector2;
 import lime.utils.Float32Array;
 import openfl.geom.Matrix3D;
 import openfl.geom.Vector3D;
+#if foxlite_polymod
+import lime.graphics.opengl.GL;
+#end
 
 /*class FoxTextureBufferFormat {
 	public inline static final INT8 = 0;
@@ -131,7 +134,7 @@ class FoxTextureBuffer extends FoxTexture {
 		Call this when you're done writing data to the buffer.
 	**/
 	public inline function updateGPU() {
-		var gl = context.gl; // Use lime GL for HScript
+		var gl = #if foxlite_polymod GL; #else context.gl; #end // Use lime GL for HScript
 		
 		#if (js && html5)
 		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, 0); // do NOT PREMULTIPLY RGB WITH ALPHA, it will MESS UP texture buffers.
@@ -146,11 +149,19 @@ class FoxTextureBuffer extends FoxTexture {
 	var bytes:Bytes;
 
 	public inline function setFloat(pos:Int, v:Float):Void {
+		#if !foxlite_polymod
 		buffer[pos] = v;
+		#else
+		bytes.setFloat(pos<<2, v);
+		#end
 	}
 
 	public inline function getFloat(pos:Int):Float {
+		#if !foxlite_polymod
 		return buffer[pos];
+		#else
+		return bytes.getFloat(pos<<2);
+		#end
 	}
 	// -------------------------------------------------------
 

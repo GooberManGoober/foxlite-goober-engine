@@ -14,6 +14,10 @@ import lime.math.Vector2;
 import lime.utils.ArrayBufferView;
 import openfl.display3D.Context3D;
 import openfl.geom.Vector3D;
+#if foxlite_polymod
+import lime.graphics.opengl.GL;
+import lime.utils.DataPointer;
+#end
 import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 

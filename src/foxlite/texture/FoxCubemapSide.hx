@@ -2,7 +2,7 @@ package foxlite.texture;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-abstract FoxCubemapSide(Int) from Int to Int {
+#if !foxlite_polymod abstract #else class #end FoxCubemapSide #if !foxlite_polymod (Int) from Int to Int #end {
 	/**
 		Positive X side of the cubemap
 	**/

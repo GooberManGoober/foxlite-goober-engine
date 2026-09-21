@@ -38,6 +38,10 @@ import lime.graphics.opengl.GL;
 import lime.math.Vector2;
 import openfl.geom.Rectangle;
 import openfl.ui.GameInput;
+#if foxlite_polymod
+import foxlite.funkin.PolymodUtils;
+import lime.utils.DataPointer;
+#end
 
 class FoxRenderPass {
 
@@ -131,9 +135,11 @@ class FoxRenderPass {
 		if(drawGroups != null) for(g in drawGroups) groups.push(g);
 		target = _target;
 
+		#if !foxlite_polymod
 		if(properties != null) for(v in Reflect.fields(properties)) {
 			Reflect.setField(this, v, Reflect.field(properties, v));
 		}
+		#end
 	}
 
 	public function pass(camera:FoxCamera, drawGroups:Array<FoxDrawTree>, framebuffer:FoxFramebuffer) {
@@ -142,8 +148,9 @@ class FoxRenderPass {
 		var visibilityLayers = camera.modelLayers;
 
 		FoxRenderer.setTarget(framebuffer);
-
+		#if !foxlite_polymod
 		onPrePass.dispatch();
+		#end
 
 		if(clear) {
 			if(useCameraColor) {
@@ -194,7 +201,9 @@ class FoxRenderPass {
 		// Generate mipmaps for framebuffer textures with mipmap filtering enabled
 		for(tex in framebuffer.colorBuffers) if(tex.mipFilter != FoxMipFilter.MIPNONE) tex.generateMipmaps();
 
+		#if !foxlite_polymod
 		onPostPass.dispatch();
+		#end
 	}
 
 	/**
@@ -207,8 +216,9 @@ class FoxRenderPass {
 		var visibilityLayers = camera.modelLayers;
 
 		FoxRenderer.setTarget(shadowFramebuffer);
-
+		#if !foxlite_polymod
 		onShadowPrePass.dispatch();
+		#end
 		if(clearShadowMap) context.clear(0, 0, 0, 0, 1, 0, 6);
 
 		GL.viewport(Std.int(__shadowMapRegion.x), Std.int(__shadowMapRegion.y), __shadowMapRegion.width <= 0 ? shadowFramebuffer.width : Std.int(__shadowMapRegion.width), __shadowMapRegion.height <= 0 ? shadowFramebuffer.height : Std.int(__shadowMapRegion.height));
@@ -247,8 +257,9 @@ class FoxRenderPass {
 				render(shadowNode, matShader, visibilityLayers, samplerId);
 			}
 		}
-
+		#if !foxlite_polymod
 		onShadowPostPass.dispatch();
+		#end
 	}
 
 	public function passShadowLights(lightData:FoxLightData, camera:FoxCamera, drawGroups:Array<FoxDrawTree>) {

@@ -2,7 +2,7 @@ package foxlite.texture;
 
 // How to create abstracts in Polymod: You don't!
 // Surprisingly, this is valid in Haxe
-abstract FoxMipFilter(Int) from Int to Int {
+#if !foxlite_polymod abstract #else class #end FoxMipFilter #if !foxlite_polymod (Int) from Int to Int #end {
 	/**
 		Select the two closest MIP levels and linearly blend between them (the highest
 		quality mode, but has some performance cost).

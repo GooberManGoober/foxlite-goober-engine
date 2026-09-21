@@ -20,9 +20,13 @@ import openfl.display3D.Context3D;
 import openfl.display3D.Program3D;
 import openfl.geom.Matrix3D;
 import openfl.geom.Vector3D;
+#if foxlite_polymod
+import lime.graphics.opengl.GL;
+import lime.utils.DataPointer;
+#end
 
 // Uniform constant types for switch statement
-@:dox(hide) abstract UType(Int) from Int to Int {
+@:dox(hide) #if !foxlite_polymod abstract #else class #end UType #if !foxlite_polymod (Int) from Int to Int #end {
 	public inline static final FLOAT = 0x1406;
 	public inline static final FLOAT_VEC2 = 0x8B50;
 	public inline static final FLOAT_VEC3 = 0x8B51;
@@ -41,8 +45,10 @@ import openfl.geom.Vector3D;
 	public inline static final SAMPLER_2D = 0x8B5E;
 }
 
+#if !foxlite_polymod
 typedef FoxShaderTextureInput = {location:Int, value:FoxTexture};
 typedef FoxUniformCache = {location:Int, type:Int, size:Int};
+#end
 
 class FoxShader {
 
@@ -139,14 +145,20 @@ class FoxShader {
 	/**
 		A temporary array to store matrix values, cached for speed
 	**/
+	#if !foxlite_polymod
 	var __tmpMatrix:Float32Array = new Float32Array(16);
+	#end
 
 	public function new():Void {
 		context = FoxRenderer.getContext();
 		gl = context.gl;
 	}
 
-	public static function staticInit() {}
+	public static function staticInit() {
+		#if foxlite_polymod
+		trace(GLOBAL_FLAGS);
+		#end
+	}
 
 	public static function fromSources(vert:String, frag:String, ?flags:Array<String>, ?output:FoxShader):FoxShader {
 		var shader = output ?? new FoxShader();
@@ -196,7 +208,7 @@ class FoxShader {
 
 		// Shadow program
 		var shadowShader = new FoxShader();
-		var shadowCheck = FoxShader.PRAGMA_SHADOW_PROGRAM;
+		var shadowCheck = #if !foxlite_polymod FoxShader.PRAGMA_SHADOW_PROGRAM; #else "#pragma shadow_program_check"; #end 
 		shadowShader.program = shader.context.createProgram(cast 1);
 		shadowShader.__fragSource = StringTools.replace(frag, shadowCheck, "#define SHADOW_PASS");
 		shadowShader.__vertSource = StringTools.replace(vert, shadowCheck, "#define SHADOW_PASS");
@@ -507,14 +519,28 @@ class FoxShader {
 				case UType.FLOAT_VEC2: gl.uniform2f(cast data.location, values[0], values[1]);
 				case UType.FLOAT_VEC3: gl.uniform3f(cast data.location, values[0], values[1], values[2]);
 				case UType.FLOAT_VEC4: gl.uniform4f(cast data.location, values[0], values[1], values[2], values[3]);
+				#if !foxlite_polymod
 				case UType.FLOAT_MAT2: gl.uniformMatrix2fv(cast data.location, false, Float32BufferCache.get(values));
 				case UType.FLOAT_MAT3: gl.uniformMatrix3fv(cast data.location, false, Float32BufferCache.get(values));
 				case UType.FLOAT_MAT4: gl.uniformMatrix4fv(cast data.location, false, Float32BufferCache.get(values));
+				#else
+				// For polymod we have to use lime GL functions, DataPointer must be working
+				#if lime_webgl
+				case UType.FLOAT_MAT2: GL.uniformMatrix2fvWEBGL(data.location, false, Float32BufferCache.get(values));
+				case UType.FLOAT_MAT3: GL.uniformMatrix3fvWEBGL(data.location, false, Float32BufferCache.get(values));
+				case UType.FLOAT_MAT4: GL.uniformMatrix4fvWEBGL(data.location, false, Float32BufferCache.get(values));
+				#else
+				case UType.FLOAT_MAT2: GL.uniformMatrix2fv(data.location, data.size, false, DataPointer.fromArrayBufferView(Float32BufferCache.get(values)));
+				case UType.FLOAT_MAT3: GL.uniformMatrix3fv(data.location, data.size, false, DataPointer.fromArrayBufferView(Float32BufferCache.get(values)));
+				case UType.FLOAT_MAT4: GL.uniformMatrix4fv(data.location, data.size, false, DataPointer.fromArrayBufferView(Float32BufferCache.get(values)));
+				#end
+				#end
 			}
 		}
 		else {
 			var buffer = Float32BufferCache.get(values);
 			switch(data.type) {
+				#if !foxlite_polymod
 				case UType.FLOAT: 	   gl.uniform1fv(cast data.location, buffer);
 				case UType.FLOAT_VEC2: gl.uniform2fv(cast data.location, buffer);
 				case UType.FLOAT_VEC3: gl.uniform3fv(cast data.location, buffer);
@@ -522,6 +548,25 @@ class FoxShader {
 				case UType.FLOAT_MAT2: gl.uniformMatrix2fv(cast data.location, false, buffer);
 				case UType.FLOAT_MAT3: gl.uniformMatrix3fv(cast data.location, false, buffer);
 				case UType.FLOAT_MAT4: gl.uniformMatrix4fv(cast data.location, false, buffer);
+				#else
+				#if lime_webgl 		   // Why didn't they just add conditional comp for a single function? 
+				case UType.FLOAT: 	   GL.uniform1fvWEBGL(data.location, buffer);
+				case UType.FLOAT_VEC2: GL.uniform2fvWEBGL(data.location, buffer);
+				case UType.FLOAT_VEC3: GL.uniform3fvWEBGL(data.location, buffer);
+				case UType.FLOAT_VEC4: GL.uniform4fvWEBGL(data.location, buffer);
+				case UType.FLOAT_MAT2: GL.uniformMatrix2fvWEBGL(data.location, false, buffer);
+				case UType.FLOAT_MAT3: GL.uniformMatrix3fvWEBGL(data.location, false, buffer);
+				case UType.FLOAT_MAT4: GL.uniformMatrix4fvWEBGL(data.location, false, buffer);
+				#else
+				case UType.FLOAT: 	   GL.uniform1fv(data.location, data.size, DataPointer.fromArrayBufferView(buffer));
+				case UType.FLOAT_VEC2: GL.uniform2fv(data.location, data.size, DataPointer.fromArrayBufferView(buffer));
+				case UType.FLOAT_VEC3: GL.uniform3fv(data.location, data.size, DataPointer.fromArrayBufferView(buffer));
+				case UType.FLOAT_VEC4: GL.uniform4fv(data.location, data.size, DataPointer.fromArrayBufferView(buffer));
+				case UType.FLOAT_MAT2: GL.uniformMatrix2fv(data.location, data.size, false, DataPointer.fromArrayBufferView(buffer));
+				case UType.FLOAT_MAT3: GL.uniformMatrix3fv(data.location, data.size, false, DataPointer.fromArrayBufferView(buffer));
+				case UType.FLOAT_MAT4: GL.uniformMatrix4fv(data.location, data.size, false, DataPointer.fromArrayBufferView(buffer));
+				#end
+				#end
 			}
 		}
 	}
@@ -543,10 +588,24 @@ class FoxShader {
 		else {
 			var buffer = Int32BufferCache.get(values);
 			switch(data.type) {
+				#if !foxlite_polymod
 				case UType.INT, UType.BOOL: 		  gl.uniform1iv(cast data.location, buffer);
 				case UType.INT_VEC2, UType.BOOL_VEC2: gl.uniform2iv(cast data.location, buffer);
 				case UType.INT_VEC3, UType.BOOL_VEC3: gl.uniform3iv(cast data.location, buffer);
 				case UType.INT_VEC4, UType.BOOL_VEC4: gl.uniform4iv(cast data.location, buffer);
+				#else
+				#if lime_webgl
+				case UType.INT, UType.BOOL: 		  GL.uniform1ivWEBGL(data.location, buffer);
+				case UType.INT_VEC2, UType.BOOL_VEC2: GL.uniform2ivWEBGL(data.location, buffer);
+				case UType.INT_VEC3, UType.BOOL_VEC3: GL.uniform3ivWEBGL(data.location, buffer);
+				case UType.INT_VEC4, UType.BOOL_VEC4: GL.uniform4ivWEBGL(data.location, buffer);
+				#else
+				case UType.INT, UType.BOOL: 		  GL.uniform1iv(data.location, data.size, DataPointer.fromArrayBufferView(buffer));
+				case UType.INT_VEC2, UType.BOOL_VEC2: GL.uniform2iv(data.location, data.size, DataPointer.fromArrayBufferView(buffer));
+				case UType.INT_VEC3, UType.BOOL_VEC3: GL.uniform3iv(data.location, data.size, DataPointer.fromArrayBufferView(buffer));
+				case UType.INT_VEC4, UType.BOOL_VEC4: GL.uniform4iv(data.location, data.size, DataPointer.fromArrayBufferView(buffer));
+				#end
+				#end
 			}
 		}
 	}
@@ -584,10 +643,16 @@ class FoxShader {
 	public function setMatrix4(name:String, value:Matrix3D):Void {
 		var location = uniformCache.get(name)?.location;
 		if(location != null) {
+			#if foxlite_polymod
+			context.setProgram(program);
+			context.setProgramConstantsFromMatrix(0, location, value);
+			FoxRenderer.allocationsThisFrame += 1; // Float32Array is not cached...
+			#else
 			// Faster method in native
 			FoxRenderer.useShader(this);
 			for(i in 0...16) __tmpMatrix[i] = value.rawData[i];
 			gl.uniformMatrix4fv(cast location, false, __tmpMatrix);
+			#end
 		}
 	}
 
@@ -595,7 +660,15 @@ class FoxShader {
 		var data = uniformCache.get(name);
 		if(data == null) return;
 		FoxRenderer.useShader(this);
+		#if !foxlite_polymod
 		gl.uniformMatrix4fv(cast data.location, false, value);
+		#else
+		#if lime_webgl
+		GL.uniformMatrix4fvWEBGL(data.location, false, value);
+		#else
+		GL.uniformMatrix4fv(data.location, data.size, false, DataPointer.fromArrayBufferView(value));
+		#end
+		#end
 	}
 
 	public inline function getGLProgram() {
