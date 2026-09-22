@@ -365,7 +365,7 @@ class FoxRenderer {
 		context.setRenderToBackBuffer();
 		
 		// Default blending
-		enableAlphaBlending(context);
+		FoxRenderer.setBlendMode(context, FoxBlendMode.MIX, true);
 		// No depth test (important!)
 		context.setDepthTest(false, cast 0);
 		context.setCulling(cast 3);
@@ -829,22 +829,9 @@ class FoxRenderer {
 		FoxRenderer.verticesDrawn += elements*count;
 		FoxRenderer.renderedInstances += count;
 	}
-	
-	/**
-		Enables alpha blending without changing the color function
-	**/
-	public static function enableAlphaBlending(context:Context3D) {
-		var gl = context.gl;
-		var cachedState = context.__contextState;
-		FoxRenderer.__blendMode = FoxBlendMode.MIX;
-		gl.enable(gl.BLEND);
-		gl.blendEquation(gl.FUNC_ADD);
-		
-		context.setBlendFactors(cast 2, cast 6);
-	}
 
-	public static function setBlendMode(context:Context3D, blendMode:Int) {
-		if(blendMode != FoxRenderer.__blendMode) {
+	public static function setBlendMode(context:Context3D, blendMode:Int, force:Bool=false) {
+		if(blendMode != FoxRenderer.__blendMode || force) {
 			var gl = context.gl;
 
 			if(blendMode == 0) gl.disable(gl.BLEND);
