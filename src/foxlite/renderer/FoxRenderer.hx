@@ -140,6 +140,11 @@ class FoxRenderer {
 	public static var MISSING_TEXTURE:FoxTexture = null;
 
 	/**
+		Single red pixel to use in empty samplers (somehow runs better)
+	**/
+	public static var BLACK_PIXEL:FoxTexture = null;
+
+	/**
 		Missing material placeholder.
 	**/
 	public static var MISSING_MATERIAL:FoxMaterial = new FoxMaterial();
@@ -161,7 +166,7 @@ class FoxRenderer {
 		#if foxlite_polymod
 		trace(BUILD_NAME, VERSION, renderContext, frameCount, drawCalls, verticesDrawn, stateSwitches, __blendMode, 
 			__depthTest, __shader, __stencilTest, renderMode, debugWireframe, mustRebuildDrawGroups, 
-			renderedInstances, onPreDraw, onPostDraw, __indexBuffer, __scissorTest, glDeviceName, MISSING_TEXTURE, 
+			renderedInstances, onPreDraw, onPostDraw, __indexBuffer, __scissorTest, glDeviceName, MISSING_TEXTURE, BLACK_PIXEL,
 			MISSING_MATERIAL, MISSING_SHADER, initialized, __target, calculateMotionVectors, extensions, maxAnisotropy
 		);
 		#end
@@ -223,6 +228,9 @@ class FoxRenderer {
 			// For an element, from left to right, F represents this format: RGBA
 			TypedArray.UInt16Array([0xF0FF, 0x000F, 0x000F, 0xF0FF])
 		);
+
+		BLACK_PIXEL = FoxTexture.wrapGL(FoxRenderer.createTextureStorage(1, 1, "r8"));
+		BLACK_PIXEL.filter = FoxTextureFilter.NEAREST;
 
 		MISSING_MATERIAL.name = "Missing material";
 		MISSING_MATERIAL.textures.set("bitmap", MISSING_TEXTURE);
@@ -357,7 +365,7 @@ class FoxRenderer {
 		context.setRenderToBackBuffer();
 		
 		// Default blending
-		enableAlphaBlending(context);
+		FoxRenderer.setBlendMode(context, FoxBlendMode.MIX, true);
 		// No depth test (important!)
 		context.setDepthTest(false, cast 0);
 		context.setCulling(cast 3);
@@ -821,26 +829,9 @@ class FoxRenderer {
 		FoxRenderer.verticesDrawn += elements*count;
 		FoxRenderer.renderedInstances += count;
 	}
-	
-	/**
-		Enables alpha blending without changing the color function
-	**/
-	public static function enableAlphaBlending(context:Context3D) {
-		var gl = context.gl;
-		var cachedState = context.__contextState;
-		FoxRenderer.__blendMode = FoxBlendMode.MIX;
-		gl.enable(gl.BLEND);
-		gl.blendEquation(gl.FUNC_ADD);
-		
-		gl.blendFuncSeparate(
-			context.__getGLBlend(cachedState.blendSourceRGBFactor), 
-			context.__getGLBlend(cachedState.blendDestinationAlphaFactor), 
-			context.__getGLBlend(cachedState.blendSourceAlphaFactor),
-			context.__getGLBlend(cachedState.blendDestinationAlphaFactor));
-	}
 
-	public static function setBlendMode(context:Context3D, blendMode:Int) {
-		if(blendMode != FoxRenderer.__blendMode) {
+	public static function setBlendMode(context:Context3D, blendMode:Int, force:Bool=false) {
+		if(blendMode != FoxRenderer.__blendMode || force) {
 			var gl = context.gl;
 
 			if(blendMode == 0) gl.disable(gl.BLEND);
