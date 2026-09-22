@@ -21,42 +21,42 @@ class FoxLoaderUtil {
 
 	// These are dynamic so you can change them at runtime
 
-	public static #if !foxlite_polymod dynamic #end function jsonPath(name:String):String {
+	public static dynamic function jsonPath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/data/$name.json';
 		return PathsClass.getPath('data/$name.json', null, true);
 	}
 
-	public static #if !foxlite_polymod dynamic #end function filePath(name:String):String {
+	public static dynamic function filePath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/$name';
 		return PathsClass.getPath('$name', null, true);
 	}
 
-	public static #if !foxlite_polymod dynamic #end function imagePath(name:String):String {
+	public static dynamic function imagePath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/images/$name.png';
 		return PathsClass.image('$name', null, true);
 	}
 
-	public static #if !foxlite_polymod dynamic #end function shaderVert(name:String):String {
+	public static dynamic function shaderVert(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/shaders/$name.vert';
 		return PathsClass.vertex('$name', null, true);
 	}
 
-	public static #if !foxlite_polymod dynamic #end function shaderFrag(name:String):String {
+	public static dynamic function shaderFrag(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/shaders/$name.frag';
 		return PathsClass.fragment('$name', null, true);
 	}
 
-	public static #if !foxlite_polymod dynamic #end function shaderIncludeRoot(name:String):String {
+	public static dynamic function shaderIncludeRoot(name:String):String {
 		return 'shaders/$name';
 	}
 
-	public static function loadJSON(name:String):Dynamic {
+	public static dynamic function loadJSON(name:String):Dynamic {
 		var path = filePath(name);
 		if(!FunkinAssets.exists(path)) return null;
 		return Json.parse(FunkinAssets.getContent(path));
 	}
 
-	public static function loadText(name:String):String {
+	public static dynamic function loadText(name:String):String {
 		var path = filePath(name);
 		if(!FunkinAssets.exists(path)) return null;
 		return FunkinAssets.getContent(path);
@@ -69,7 +69,7 @@ class FoxLoaderUtil {
 		@param cb The callback function that will be executed for each chunk
 		@param sep Custom line separator, default is "\n"
 	**/
-	public static function forEachLine(s:String, cb:(chunk:String) -> Void, sep:String="\n") {
+	public static dynamic function forEachLine(s:String, cb:(chunk:String) -> Void, sep:String="\n") {
 		var pos = 0;
 		var len = -1;
 		while(true) {
