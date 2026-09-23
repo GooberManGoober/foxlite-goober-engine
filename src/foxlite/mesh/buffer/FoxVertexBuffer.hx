@@ -19,6 +19,17 @@ class FoxVertexBuffer {
 	public var type:Int = 0;
 
 	/**
+		If buffer data has been uploaded once
+	**/
+	public var hasData:Bool = false;
+
+	public var loaded(get, never):Bool;
+
+	function get_loaded():Bool {
+		return hasData && count > 0 && bytesPerElement != 0 && id != null;
+	}
+
+	/**
 		Used at render time, if enabled, values from the byte/short/int range will be normalized from -1 to 1 
 		(or 0 to 1 in the case of unsigned)
 	**/
@@ -98,6 +109,7 @@ class FoxVertexBuffer {
 		var gl = context.gl;
 		context.__bindGLArrayBuffer(id);
 		gl.bufferData(gl.ARRAY_BUFFER, data, usage);
+		hasData = true;
 	}
 
 	public function updateFromTypedArray(data:ArrayBufferView, byteOffset:Int=0) {
@@ -117,5 +129,6 @@ class FoxVertexBuffer {
 	public function dispose() {
 		GL.deleteBuffer(id);
 		id = null;
+		hasData = false;
 	}
 }

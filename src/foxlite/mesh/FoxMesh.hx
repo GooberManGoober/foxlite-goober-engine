@@ -54,6 +54,15 @@ class FoxMesh {
 	public var context:Context3D = null;
 	public var __isCopy:Bool = false;
 
+	/**
+		Mesh is considered loaded when the vertex array is atleast loaded
+	**/
+	public var loaded(get, never):Bool;
+
+	function get_loaded():Bool {
+		return buffers[FoxVertexBufferType.VERTICES]?.loaded ?? false;
+	}
+
 	public function new(?mat:FoxMaterial):Void {
 		context = FoxRenderer.getContext();
 		this.material = mat;
