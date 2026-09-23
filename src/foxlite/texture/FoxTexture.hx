@@ -210,12 +210,17 @@ class FoxTexture {
 			image.premultiplied = true;
 			#end
 
-			FoxRenderer.runTaskAtNextDraw(() -> {
+			function task() {
 				var tex = FoxRenderer.getContext().createTexture(image.width, image.height, format, false);
 				tex.__uploadFromImage(image);
 				image = null;
 				foxTex.takeGL(tex);
-			});
+			}
+
+			if(FoxRenderer.forceSyncLoading)
+				task();
+			else
+				FoxRenderer.runTaskAtNextDraw(task);
 		}
 
 		if(isDataUrl) {
@@ -226,7 +231,7 @@ class FoxTexture {
 		} 
 		else {
 			// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
-			if(ThreadPool.isMainThread())
+			if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading)
 				Image.loadFromFile(name).onComplete(image -> onImageLoaded(image));
 			else
 				onImageLoaded(Image.fromFile(name));

@@ -120,11 +120,16 @@ class FoxTextureBuffer extends FoxTexture {
 		_glFormat = texFmtData.format;
 		_glType = Reflect.field(gl, typeString.toUpperCase());
 
-		FoxRenderer.runTaskAtNextDraw(() -> {
+		function task() {
 			glTexture = FoxRenderer.createTextureStorage(length, 1, formatString, typeString);
 			// Update texture state
 			FoxRenderer.useTexture(0, this);
-		});
+		}
+		
+		if(FoxRenderer.forceSyncLoading)
+			task();
+		else 
+			FoxRenderer.runTaskAtNextDraw(task);
 		pixelSize.x = 1.0 / length;
 
 		__paramsNeedUpdate = true;
