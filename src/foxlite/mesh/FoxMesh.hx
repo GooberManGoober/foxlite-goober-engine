@@ -58,6 +58,7 @@ class FoxMesh {
 		context = FoxRenderer.getContext();
 		this.material = mat;
 		FoxRenderer.allocationsThisFrame += 1;
+		lods = [buffers];
 	}
 
 	/*

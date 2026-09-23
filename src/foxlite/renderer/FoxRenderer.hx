@@ -4,6 +4,7 @@ import EReg;
 import Reflect;
 import StringTools;
 import StringBuf;
+import haxe.ds.List;
 import haxe.ds.StringMap;
 import foxlite.FoxCache;
 import foxlite.FoxShader;
@@ -45,6 +46,10 @@ import flixel.FlxG;
 import lime.utils.DataPointer;
 #end
 
+#if (target.threaded && sys)
+import sys.thread.Mutex;
+#end
+
 typedef FoxGLExtensions = {
 	?anisotropic:Dynamic,
 	?drawBuffersEXT:Dynamic, // WebGL 1
@@ -52,7 +57,10 @@ typedef FoxGLExtensions = {
 	?textureFloat:Dynamic,
 	?textureHalfFloat:Dynamic,
 	?elementIndexUint:Dynamic, // WebGL 1
-	?instancedArrays:Dynamic // WebGL 1 / ES 2
+	?instancedArrays:Dynamic, // WebGL 1 / ES 2
+	// Compressed textures
+	?astc:Dynamic,
+	?s3tc:Dynamic
 };
 
 // TODO: Make this a singleton so we don't use this many static vars
@@ -134,6 +142,14 @@ class FoxRenderer {
 	public static final onPreDraw:FlxTypedSignalImpl<()->Void> = new FlxTypedSignalImpl();
 	public static final onPostDraw:FlxTypedSignalImpl<()->Void> = new FlxTypedSignalImpl();
 
+	public static final nextDrawTasks:List<()->Void> = new List();
+
+	#if (target.threaded && sys)
+	public static final mutex:Mutex = new Mutex();
+	#else
+	public static final mutex = {acquire: () -> {}, tryAcquire:()->{return true;}, release: () -> {}}; // dummy
+	#end
+
 	/**
 		Missing texture placeholder.
 	**/
@@ -203,6 +219,13 @@ class FoxRenderer {
 		extensions.instancedArrays = GL.getExtension("EXT_instanced_arrays")
 								  ?? GL.getExtension("ARB_instanced_arrays")
 								  ?? GL.getExtension("ANGLE_instanced_arrays");
+
+		extensions.astc = GL.getExtension("KHR_texture_compression_astc_ldr")
+					   ?? GL.getExtension("OES_texture_compression_astc")
+					   ?? GL.getExtension("WEBGL_compressed_texture_astc");
+
+		extensions.s3tc = GL.getExtension("EXT_texture_compression_s3tc")
+					   ?? GL.getExtension("WEBGL_compressed_texture_s3tc");
 
 		trace('[FoxLite > FoxRenderer]: Texture Anisotropy ${extensions.anisotropic == null ?  "not" : "is"} supported.');
 
@@ -345,6 +368,12 @@ class FoxRenderer {
 
 	public static function begin() {
 		onPreDraw.dispatch();
+		if(nextDrawTasks.length > 0) {
+			mutex.acquire();
+			for(task in nextDrawTasks) task();
+			nextDrawTasks.clear();
+			mutex.release();
+		}
 		// Static contexts are still weird in HScript (VS 0.8.4), so we still need to use the containing class.
 		FoxRenderer.drawCalls = 0;
 		FoxRenderer.verticesDrawn = 0;
@@ -382,6 +411,18 @@ class FoxRenderer {
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, FoxRenderer.__indexBuffer);
 
 		FoxRenderer.mustRebuildDrawGroups = false;
+	}
+
+	/**
+		Schedules a task to be performed when `onPreDraw` is dispatched, the
+		task is removed once it finished executing.
+
+		This can be called from threads to sync GL stuff
+	**/
+	public inline static function runTaskAtNextDraw(task:()->Void) {
+		mutex.acquire();
+		nextDrawTasks.add(task);
+		mutex.release();
 	}
 
 	public static function generateMipmap(context:Context3D, texture:FoxTexture) {
@@ -434,6 +475,11 @@ class FoxRenderer {
 
 	public inline static function useShader(shader:FoxShader) {
 		if(FoxRenderer.__shader != shader) {
+
+			// Compile shaders
+			if(shader.__needsCompiling) shader.compile();
+			if(shader?.shadow?.__needsCompiling == true) shader.shadow.compile();
+
 			GL.useProgram(shader.program.__glProgram);
 			FoxRenderer.__shader = FoxRenderer.frameCount == 0 ? null : shader; // Fix uniforms not updating before the renderer starts
 		}
@@ -1062,7 +1108,7 @@ class FoxRenderer {
 
 	public static function setAttributePointerAt(index:Int, buffer:FoxVertexBuffer, bufferOffset:Int=0) {
 		if(index < 0) return;
-		if(buffer == null) {
+		if(buffer?.id == null) {
 			GL.disableVertexAttribArray(index);
 			context.__bindGLArrayBuffer(null);
 			return;

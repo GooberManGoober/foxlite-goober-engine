@@ -76,7 +76,9 @@ class FoxMaterial {
 	public var lineWidth:Float = 1;
 
 	public function new(?shader_:FoxShader) {
+		FoxRenderer.mutex.acquire();
 		FoxMaterial.__GLOBAL_ID += 1;
+		FoxRenderer.mutex.release();
 		__id = __GLOBAL_ID;
 
 		// Write default uniforms

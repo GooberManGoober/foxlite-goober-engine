@@ -2,6 +2,8 @@ package foxlite.texture;
 
 import StringTools;
 import lime.graphics.opengl.GL;
+import lime.graphics.Image;
+import lime.system.ThreadPool;
 import foxlite.FoxCache;
 import foxlite.loaders.FoxLoaderUtil;
 import foxlite.renderer.FoxRenderer;
@@ -23,6 +25,18 @@ class FoxTexture {
 	public var mipFilter(default, set):FoxMipFilter;
 	public var glTexture:TextureBase; // Fix C++ black textures via downcast
 	public var assetsKey:String;
+
+	/**
+		Wheter or not this texture is loaded
+
+		This property also indicates wheter this texture has a valid `glTexture`,
+		usually assigned when images load
+	**/
+	public var loaded(get, never):Bool;
+
+	function get_loaded():Bool {
+		return glTexture != null;
+	}
 
 	public var width(get, default):Int;
 	public var height(get, default):Int;
@@ -154,6 +168,8 @@ class FoxTexture {
 	
 	/**
 		Loads a `FoxTexture` using a full raw asset path (including extension)
+
+		This may also include compressed textures with the .dds extension
 	**/
 	public static function fromImageRaw(name:String, mipmaps:Bool=false, format:Context3DTextureFormat=#if !foxlite_polymod Context3DTextureFormat.BGRA #else 1 #end, ?params:{?wrapMode:FoxWrapMode, ?filter:FoxTextureFilter, ?mipFilter:FoxMipFilter}):FoxTexture {
 		if(FoxCache.textures().exists(name)) return FoxCache.textures().get(name);
@@ -164,39 +180,7 @@ class FoxTexture {
 			return null;
 		}
 
-		var data:BitmapData = null;
-		if(isDataUrl) {
-			var components = name.split(',');
-			data = BitmapData.fromBase64(components[1], components[0].substr(5, components[0].indexOf(';base64')-5));
-		} 
-		else {
-			data = Assets.getBitmapData(name, false #if cne , false #end);
-		}
-
-		if(data == null) {
-			trace('[Foxlite > FoxTexture]: Could not load image: ${name} (BitmapData error.)');
-			return null;
-		}
-
-		var foxTex:FoxTexture = null;
-
-		if(!data.readable && data.getTexture(FoxRenderer.getContext()) != null) { // Already uploaded to GPU
-			foxTex = FoxTexture.wrap(data);
-		}
-		else if(data.image?.buffer != null) {
-			var tex = FoxRenderer.getContext().createTexture(data.width, data.height, format, false);
-			tex.__uploadFromImage(data.image);
-			data.dispose(); // Cleanup in CPU
-			foxTex = FoxTexture.wrapGL(tex);
-		}
-		else if(data.image == null) {
-			trace('[Foxlite > FoxTexture]: Could not load image: ${name} (Asset was found, but Image failed to create.)');
-			return null;
-		}
-		else if(data.image.buffer == null) {
-			trace('[Foxlite > FoxTexture]: Could not load image: ${name} (Asset was found, but Buffer is non-existant.)');
-			return null;
-		}
+		var foxTex = new FoxTexture();
 
 		if(params != null) {
 			foxTex.wrapMode = params.wrapMode ?? FoxWrapMode.CLAMP;
@@ -207,11 +191,58 @@ class FoxTexture {
 		foxTex.assetsKey = name;
 		trace("[FoxLite > FoxTexture]: Add texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
 		FoxCache.textures().set(name, foxTex);
+
+		function onImageLoaded(image:Image) {
+			if(image == null) {
+				trace('[Foxlite > FoxTexture]: Could not create image: ${name} (Image error.)');
+				FoxCache.textures().remove(name);
+				return;
+			}
+			else if(image?.buffer == null) {
+				trace('[Foxlite > FoxTexture]: Could not create texture: ${name} (Asset was found, but Buffer is non-existant.)');
+				FoxCache.textures().remove(name);
+				return;
+			}
+			
+			// Make it compatible with openfl...
+			#if sys
+			image.format = cast 2; // BGRA32
+			image.premultiplied = true;
+			#end
+
+			FoxRenderer.runTaskAtNextDraw(() -> {
+				var tex = FoxRenderer.getContext().createTexture(image.width, image.height, format, false);
+				tex.__uploadFromImage(image);
+				image = null;
+				foxTex.takeGL(tex);
+			});
+		}
+
+		if(isDataUrl) {
+			// We can load it right away
+			var components = name.split(',');
+			var image = Image.fromBase64(components[1], components[0].substr(5, components[0].indexOf(';base64')-5));
+			onImageLoaded(image); 
+		} 
+		else {
+			// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
+			if(ThreadPool.isMainThread())
+				Image.loadFromFile(name).onComplete(image -> onImageLoaded(image));
+			else
+				onImageLoaded(Image.fromFile(name));
+		}
+
 		return foxTex;
 	}
 
-	// TODO: DXT and ASTC texture support
-	//public static function fromImageCompressed(name:String, ?mipmaps:Bool, ?format:Int, ?params):FoxTexture {}
+	/**
+		Loads a compressed texture.
+
+		Foxlite supports S3TC formats (DXT) in all platforms.
+	**/
+	public static function fromImageCompressed(name:String, ?mipmaps:Bool, ?format:Int, ?params):FoxTexture {
+		return null;
+	}
 
 	/**
 		Creates a texture on the GPU, this texture can be used as a render target.

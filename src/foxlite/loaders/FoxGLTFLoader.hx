@@ -48,6 +48,7 @@ import lime.utils.ArrayBufferView;
 import lime.math.Vector2;
 import lime.graphics.Image;
 import lime.system.Endian;
+import lime.system.ThreadPool;
 
 import openfl.Assets;
 import openfl.geom.Vector3D;
@@ -312,16 +313,24 @@ class FoxGLTFLoader {
 					var buffer = buffers[view.buffer];
 					var imageBytes = Bytes.alloc(view.byteLength);
 					imageBytes.blit(0, buffer, view.byteOffset, view.byteLength);
-					
-					Image.loadFromBytes(imageBytes).onComplete(image -> {
+
+					function onImageLoaded(image:Image) {
 						(imageBytes:ByteArray).clear();
 						if(image == null) return;
 						// Upload image directly to the GPU
 						// This method is completely detached from openfl's BitmapData operations
 						// Unless we find a better method, we'll stick with this
-						texture.glTexture = FoxRenderer.createTextureStorage(image.width, image.height, image.transparent ? "rgba" : "rgb");
-						(cast texture.glTexture:Texture).uploadFromTypedArray(image.buffer.data);
-					});
+						FoxRenderer.runTaskAtNextDraw(() -> {
+							texture.glTexture = FoxRenderer.createTextureStorage(image.width, image.height, image.transparent ? "rgba" : "rgb");
+							(cast texture.glTexture:Texture).uploadFromTypedArray(image.buffer.data);
+						});
+					}
+					
+					// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
+					if(ThreadPool.isMainThread())
+						Image.loadFromBytes(imageBytes).onComplete(onImageLoaded);
+					else
+						onImageLoaded(Image.fromBytes(imageBytes));
 				}
 				else texture = FoxCache.textures().get(directory + image.name);
 				textures.push(texture);

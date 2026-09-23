@@ -6,10 +6,11 @@ import openfl.display3D.Context3D;
 import lime.graphics.opengl.GL;
 import lime.utils.ArrayBufferView;
 import lime.utils.DataPointer;
+import lime.system.ThreadPool;
 
 class FoxVertexBuffer {
 	
-	public var id:lime.graphics.opengl.GLBuffer;
+	public var id:lime.graphics.opengl.GLBuffer = null;
 	public var usage:Int;
 	public var count:Int;
 	public var components:Int;
@@ -38,7 +39,6 @@ class FoxVertexBuffer {
 		context = FoxRenderer.getContext();
 		count = elements;
 		components = dataPerVertex;
-		id = GL.createBuffer();
 		usage = dynamicUsage ? context.gl.DYNAMIC_DRAW : context.gl.STATIC_DRAW;
 	}
 
@@ -80,9 +80,16 @@ class FoxVertexBuffer {
 		bytesPerElement = js.Syntax.code("this.data.BYTES_PER_ELEMENT");
 		#end
 
-		
 		stride = components * bytesPerElement;
+		
+		if(ThreadPool.isMainThread())
+			_uploadTask();
+		else
+			FoxRenderer.runTaskAtNextDraw(_uploadTask);
+	}
 
+	function _uploadTask() {
+		if(id == null) id = GL.createBuffer();
 		bindAndUpload();
 		if(!FoxRenderer.preserveGLBufferData) this.data = null;
 	}
@@ -109,5 +116,6 @@ class FoxVertexBuffer {
 
 	public function dispose() {
 		GL.deleteBuffer(id);
+		id = null;
 	}
 }
