@@ -320,14 +320,19 @@ class FoxGLTFLoader {
 						// Upload image directly to the GPU
 						// This method is completely detached from openfl's BitmapData operations
 						// Unless we find a better method, we'll stick with this
-						FoxRenderer.runTaskAtNextDraw(() -> {
+						function task() {
 							texture.glTexture = FoxRenderer.createTextureStorage(image.width, image.height, image.transparent ? "rgba" : "rgb");
 							(cast texture.glTexture:Texture).uploadFromTypedArray(image.buffer.data);
-						});
+						}
+						
+						if(FoxRenderer.forceSyncLoading)
+							task();
+						else 
+							FoxRenderer.runTaskAtNextDraw(task);
 					}
 					
 					// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
-					if(ThreadPool.isMainThread())
+					if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading)
 						Image.loadFromBytes(imageBytes).onComplete(onImageLoaded);
 					else
 						onImageLoaded(Image.fromBytes(imageBytes));
