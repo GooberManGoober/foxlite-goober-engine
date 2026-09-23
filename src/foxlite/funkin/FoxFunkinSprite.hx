@@ -8,7 +8,7 @@ import foxlite.mesh.buffer.FoxVertexBufferType;
 #if (foxlite_polymod || polymod)
 import funkin.graphics.FunkinSprite;
 #else
-typedef FunkinSprite = Dynamic; // Keep haxe happy
+import funkin.objects.FunkinSprite;
 #end
 
 /**

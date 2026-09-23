@@ -4,7 +4,8 @@ import flixel.util.FlxColor;
 import foxlite.FoxBasic;
 import foxlite.FoxCamera;
 import foxlite.environment.FoxEnvironment;
-import foxlite.funkin.FoxExtendableSprite;
+
+import funkin.objects.FunkinSprite;
 
 import foxlite.group.FoxGroup;
 import foxlite.group.FoxTypedGroup;
@@ -25,7 +26,7 @@ import openfl.geom.Vector3D;
 import foxlite.physics.FoxPhysicsWorld;
 #end
 
-class FoxScene extends FoxExtendableSprite {
+class FoxScene extends FunkinSprite {
 
 	/**
 		Scene render targets.
