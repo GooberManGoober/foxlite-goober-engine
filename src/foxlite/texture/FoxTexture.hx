@@ -337,12 +337,12 @@ class FoxTexture {
 			var result = switch(magic) {
 				case 0x20534444: __fromDDSBytes(bytes, foxTex); // DDS
 				case 0x5CA1AB13: __fromASTCBytes(bytes, foxTex); // ASTC (astcenc)
-				default: false;
+				default: {
+					trace('[Foxlite > FoxTexture]: Could not create compressed image: ${name} (Unrecognized compressed texture. Header: ${bytes.getString(0, 4)})');
+					false;
+				}
 			}
-			if(!result) {
-				FoxCache.textures().remove(name);
-				trace('[Foxlite > FoxTexture]: Could not create compressed image: ${name} (Unrecognized compressed texture. Header: ${bytes.getString(0, 4)})');
-			}
+			if(!result) FoxCache.textures().remove(name);
 		}
 
 		if(isDataUrl) {
@@ -404,7 +404,10 @@ class FoxTexture {
 		final etc2 = FoxRenderer.extensions.etc2;
 
 		var err:String = "";
-		if((StringTools.startsWith(pfFourCC, "BC") || StringTools.startsWith(pfFourCC, "ATI")) && rgtc == null) {
+		if(StringTools.startsWith(pfFourCC, "DXT") && s3tc == null) {
+			err = "EXT_texture_compression_s3tc";
+		}
+		else if((StringTools.startsWith(pfFourCC, "BC") || StringTools.startsWith(pfFourCC, "ATI")) && rgtc == null) {
 			err = "EXT_texture_compression_rgtc";
 		}
 		else if(pfFourCC == "ETC1" && etc1 == null) {
