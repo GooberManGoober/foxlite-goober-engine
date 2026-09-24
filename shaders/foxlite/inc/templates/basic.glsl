@@ -260,7 +260,7 @@ void mainFrag_basic() {
 		vec4 envColor = pow(panoramaSky(skyTexture, dir, float(SKY_RADIANCE_LEVEL)), 1./vec4(4));	
 		albedo *= envColor;
 	#endif
-		albedo = mix(albedo, skyColor, clamp(metallic, 0.0, 1.0));
+		albedo.rgb = mix(albedo.rgb, skyColor.rgb, clamp(metallic, 0.0, 1.0));
 	#else
 		albedo.rgb *= 1.0 - metallic;
 	#endif

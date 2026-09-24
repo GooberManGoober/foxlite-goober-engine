@@ -366,6 +366,9 @@ class FoxGLTFLoader {
 
 				if(Std.isOfType(mat.alphaCutoff, Float) || Std.isOfType(mat.alphaCutoff, Int))
 					material.alphaScissor = mat.alphaCutoff;
+
+				if(mat.alphaMode == "BLEND" && material.alphaScissor <= 0)
+					material.alphaScissor = 0.05;
 				
 				if(mat.emissiveTexture != null) {
 					addFlag("EMISSIVE_MAP");
@@ -387,8 +390,8 @@ class FoxGLTFLoader {
 
 				var pbr:Dynamic = mat.pbrMetallicRoughness;
 
-				if(pbr?.metallicFactor != null) material.setMetallic(pbr.metallicFactor);
-				if(pbr?.roughnessFactor != null) material.setRoughness(pbr.roughnessFactor);
+				material.setMetallic(pbr?.metallicFactor ?? 1);
+				material.setRoughness(pbr?.roughnessFactor ?? 1);
 
 				if(pbr?.baseColorFactor != null) {
 					var c = pbr?.baseColorFactor;
