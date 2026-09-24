@@ -58,9 +58,17 @@ typedef FoxGLExtensions = {
 	?textureHalfFloat:Dynamic,
 	?elementIndexUint:Dynamic, // WebGL 1
 	?instancedArrays:Dynamic, // WebGL 1 / ES 2
+	?textureCompression:Dynamic,
 	// Compressed textures
 	?astc:Dynamic,
-	?s3tc:Dynamic
+	// S3TC
+	?s3tc:Dynamic,
+	?s3tc_srgb:Dynamic,
+	?rgtc:Dynamic,
+	?bptc:Dynamic,
+	// Android
+	?etc1:Dynamic, // gles2
+	?etc2:Dynamic  // gles3
 };
 
 // TODO: Make this a singleton so we don't use this many static vars
@@ -137,6 +145,8 @@ class FoxRenderer {
 	**/
 	public static var forceSyncLoading:Bool = false;
 
+	public static var compressedTexturesSupported:Bool = false;
+
 	/**
 		If greater than 0, forces the renderer to render using `GL.LINES` with the specified width
 	**/
@@ -190,7 +200,7 @@ class FoxRenderer {
 		trace(BUILD_NAME, VERSION, renderContext, frameCount, drawCalls, verticesDrawn, stateSwitches, __blendMode, 
 			__depthTest, __shader, __stencilTest, renderMode, debugWireframe, mustRebuildDrawGroups, 
 			renderedInstances, onPreDraw, onPostDraw, __indexBuffer, __scissorTest, glDeviceName, MISSING_TEXTURE, BLACK_PIXEL,
-			MISSING_MATERIAL, MISSING_SHADER, initialized, __target, calculateMotionVectors, extensions, maxAnisotropy
+			MISSING_MATERIAL, MISSING_SHADER, initialized, __target, calculateMotionVectors, extensions, maxAnisotropy, compressedTexturesSupported
 		);
 		#end
 		
@@ -227,12 +237,47 @@ class FoxRenderer {
 								  ?? GL.getExtension("ARB_instanced_arrays")
 								  ?? GL.getExtension("ANGLE_instanced_arrays");
 
+		extensions.textureCompression = GL.getExtension("ARB_texture_compression");
+
+		// These though, we do need em
 		extensions.astc = GL.getExtension("KHR_texture_compression_astc_ldr")
 					   ?? GL.getExtension("OES_texture_compression_astc")
 					   ?? GL.getExtension("WEBGL_compressed_texture_astc");
 
 		extensions.s3tc = GL.getExtension("EXT_texture_compression_s3tc")
-					   ?? GL.getExtension("WEBGL_compressed_texture_s3tc");
+					   ?? GL.getExtension("WEBGL_compressed_texture_s3tc")
+					   ?? GL.getExtension("MOZ_WEBGL_compressed_texture_s3tc")
+					   ?? GL.getExtension("WEBKIT_WEBGL_compressed_texture_s3tc");
+
+		extensions.s3tc_srgb = GL.getExtension("EXT_texture_compression_s3tc_srgb")
+		 				    ?? GL.getExtension("WEBGL_compressed_texture_s3tc_srgb")
+		 			   		?? GL.getExtension("MOZ_WEBGL_compressed_texture_s3tc_srgb")
+		 			   		?? GL.getExtension("WEBKIT_WEBGL_compressed_texture_s3tc_srgb");
+		
+		extensions.rgtc = GL.getExtension("ARB_texture_compression_rgtc")
+					   ?? GL.getExtension("EXT_texture_compression_rgtc");
+
+		extensions.bptc = GL.getExtension("ARB_texture_compression_bptc")
+					   ?? GL.getExtension("EXT_texture_compression_bptc");
+
+		extensions.etc1 = GL.getExtension("WEBGL_compressed_texture_etc1")
+					   ?? GL.getExtension("OES_compressed_ETC1_RGB8_texture");
+
+		extensions.etc2 = GL.getExtension("WEBGL_compressed_texture_etc");
+		#if (android && lime_opengles)
+		// Polyfill
+		extensions.etc2 ??= {
+			COMPRESSED_RGB8_ETC2: 37492,
+			COMPRESSED_RGBA8_ETC2_EAC: 37496
+		};
+		#end
+
+		FoxRenderer.compressedTexturesSupported = 
+		  !(extensions.s3tc == null 
+		 && extensions.s3tc_srgb == null 
+		 && extensions.bptc == null 
+		 && extensions.astc == null
+		 && extensions.etc1 == null);
 
 		trace('[FoxLite > FoxRenderer]: Texture Anisotropy ${extensions.anisotropic == null ?  "not" : "is"} supported.');
 
@@ -947,18 +992,7 @@ class FoxRenderer {
 	**/
 	public static function createTextureStorage(width:Int, height:Int, format:String="rgba", type:String="unsigned_byte"):Texture {
 		var gl = context.gl;
-
-		// Create dummy texture object
-		FoxRenderer.allocationsThisFrame += 2;
-		@:privateAccess var tex = new Texture(context, 2, 2, cast 1, false, 0);
-
-		// Cleanup
-		tex.dispose();
-		
-		// Now setup our texture
-		tex.__width = width;
-		tex.__height = height;
-
+		var tex = createOpenFLTemplateTexture(width, height);
 		// Create texture with our format to be bound to a framebuffer
 
 		var data = FoxRenderer.getTextureFormat(format);
@@ -982,14 +1016,7 @@ class FoxRenderer {
 
 	public static function createTextureCubemapStorage(size:Int, format:String="rgba", type:String="unsigned_byte"):CubeTexture {
 		var gl = context.gl;
-
-		FoxRenderer.allocationsThisFrame += 2;
-		@:privateAccess var tex = new CubeTexture(context, 2, cast 1, false, 0);
-		tex.dispose();
-		
-		// Now setup our texture
-		tex.__width = size;
-		tex.__height = size;
+		var tex = createOpenFLTemplateCubeTexture(size);
 
 		var data = FoxRenderer.getTextureFormat(format);
 		var type = Reflect.field(gl, type.toUpperCase());
@@ -1013,6 +1040,50 @@ class FoxRenderer {
 		
 		context.__bindGLTextureCubeMap(null);
 		
+		return tex;
+	}
+
+	public static function createOpenFLTemplateTexture(width:Int, height:Int, withGL:Bool=false) {
+		var gl = context.gl;
+
+		// Create dummy texture object
+		FoxRenderer.allocationsThisFrame += 2;
+		@:privateAccess var tex = new Texture(context, 2, 2, cast 1, false, 0);
+
+		// Cleanup
+		tex.dispose();
+
+		// Now setup our texture
+		tex.__width = width;
+		tex.__height = height;
+
+		if(withGL) {
+			tex.__textureID = gl.createTexture();
+			context.__bindGLTexture2D(tex.__textureID);
+		}
+
+		return tex;
+	}
+
+	public static function createOpenFLTemplateCubeTexture(size:Int, withGL:Bool=false) {
+		var gl = context.gl;
+
+		// Create dummy texture object
+		FoxRenderer.allocationsThisFrame += 2;
+		@:privateAccess var tex = new CubeTexture(context, 2, cast 1, false, 0);
+
+		// Cleanup
+		tex.dispose();
+
+		// Now setup our texture
+		tex.__width = size;
+		tex.__height = size;
+
+		if(withGL) {
+			tex.__textureID = gl.createTexture();
+			context.__bindGLTextureCubeMap(tex.__textureID);
+		}
+
 		return tex;
 	}
 
