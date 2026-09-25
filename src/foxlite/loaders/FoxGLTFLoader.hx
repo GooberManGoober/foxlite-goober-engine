@@ -48,6 +48,7 @@ import lime.utils.ArrayBufferView;
 import lime.math.Vector2;
 import lime.graphics.Image;
 import lime.system.Endian;
+import lime.system.ThreadPool;
 
 import funkin.FunkinAssets;
 
@@ -317,16 +318,29 @@ class FoxGLTFLoader {
 					var buffer = buffers[view.buffer];
 					var imageBytes = Bytes.alloc(view.byteLength);
 					imageBytes.blit(0, buffer, view.byteOffset, view.byteLength);
-					
-					Image.loadFromBytes(imageBytes).onComplete(image -> {
+
+					function onImageLoaded(image:Image) {
 						(imageBytes:ByteArray).clear();
 						if(image == null) return;
 						// Upload image directly to the GPU
 						// This method is completely detached from openfl's BitmapData operations
 						// Unless we find a better method, we'll stick with this
-						texture.glTexture = FoxRenderer.createTextureStorage(image.width, image.height, image.transparent ? "rgba" : "rgb");
-						(cast texture.glTexture:Texture).uploadFromTypedArray(image.buffer.data);
-					});
+						function task() {
+							texture.glTexture = FoxRenderer.createTextureStorage(image.width, image.height, image.transparent ? "rgba" : "rgb");
+							(cast texture.glTexture:Texture).uploadFromTypedArray(image.buffer.data);
+						}
+						
+						if(FoxRenderer.forceSyncLoading)
+							task();
+						else 
+							FoxRenderer.runTaskAtNextDraw(task);
+					}
+					
+					// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
+					if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading)
+						Image.loadFromBytes(imageBytes).onComplete(onImageLoaded);
+					else
+						onImageLoaded(Image.fromBytes(imageBytes));
 				}
 				else texture = FoxCache.textures().get(directory + image.name);
 				textures.push(texture);
@@ -357,6 +371,9 @@ class FoxGLTFLoader {
 
 				if(Std.isOfType(mat.alphaCutoff, Float) || Std.isOfType(mat.alphaCutoff, Int))
 					material.alphaScissor = mat.alphaCutoff;
+
+				if(mat.alphaMode == "BLEND" && material.alphaScissor <= 0)
+					material.alphaScissor = 0.05;
 				
 				if(mat.emissiveTexture != null) {
 					addFlag("EMISSIVE_MAP");
@@ -378,8 +395,8 @@ class FoxGLTFLoader {
 
 				var pbr:Dynamic = mat.pbrMetallicRoughness;
 
-				if(pbr?.metallicFactor != null) material.setMetallic(pbr.metallicFactor);
-				if(pbr?.roughnessFactor != null) material.setRoughness(pbr.roughnessFactor);
+				material.setMetallic(pbr?.metallicFactor ?? 1);
+				material.setRoughness(pbr?.roughnessFactor ?? 1);
 
 				if(pbr?.baseColorFactor != null) {
 					var c = pbr?.baseColorFactor;
