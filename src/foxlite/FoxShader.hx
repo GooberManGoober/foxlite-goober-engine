@@ -13,7 +13,7 @@ import haxe.ds.StringMap;
 import lime.graphics.WebGLRenderContext;
 import lime.math.Vector2;
 import lime.utils.Float32Array;
-import openfl.Assets;
+import lime.utils.Assets;
 import openfl.display3D.Context3D;
 import openfl.display3D.Program3D;
 import openfl.geom.Matrix3D;

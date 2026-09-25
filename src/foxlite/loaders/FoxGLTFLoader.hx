@@ -49,8 +49,8 @@ import lime.math.Vector2;
 import lime.graphics.Image;
 import lime.system.Endian;
 import lime.system.ThreadPool;
+import lime.utils.Assets;
 
-import openfl.Assets;
 import openfl.geom.Vector3D;
 import openfl.geom.Matrix3D;
 import openfl.utils.ByteArray;
