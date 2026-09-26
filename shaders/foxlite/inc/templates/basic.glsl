@@ -235,7 +235,7 @@ void mainFrag_basic() {
 
 		// From the glTF 2.0 spec
 		vec4 ormData = texture2D(ormMap, foxlite_TexCoordv);
-		float ao   = ormData.r;
+		float ao   = ormData.r + step(ormData.r, 0.0);
 		roughness *= ormData.g;
 		metallic  *= ormData.b;
 	#else
