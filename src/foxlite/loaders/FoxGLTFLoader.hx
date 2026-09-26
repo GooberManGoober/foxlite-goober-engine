@@ -306,7 +306,7 @@ class FoxGLTFLoader {
 					texture.wrapMode = params.wrapMode;
 					texture.filter = params.filter;
 					texture.mipFilter = params.mipFilter;
-					trace("[FoxLite > FoxGLTFLoader]: Add buffer texture to cache: " + texture.assetsKey);
+
 					FoxCache.textures().set(directory + image.name, texture);
 
 					var view = bufferViews[image.bufferView];
@@ -317,6 +317,9 @@ class FoxGLTFLoader {
 					function onImageLoaded(image:Image) {
 						(imageBytes:ByteArray).clear();
 						if(image == null) return;
+
+						trace("[FoxLite > FoxGLTFLoader]: Add buffer texture to cache: " + texture.assetsKey);
+
 						// Upload image directly to the GPU
 						// This method is completely detached from openfl's BitmapData operations
 						// Unless we find a better method, we'll stick with this
@@ -330,10 +333,18 @@ class FoxGLTFLoader {
 						else 
 							FoxRenderer.runTaskAtNextDraw(task);
 					}
+
+					function onImageError(e:Dynamic) {
+						trace('[Foxlite > FoxGLTFLoader]: Could not create buffer texture: ${image.name} ($e)');
+						FoxCache.textures().remove(directory + image.name);
+					}
 					
 					// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
-					if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading)
-						Image.loadFromBytes(imageBytes).onComplete(onImageLoaded);
+					if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading) {
+						var future = Image.loadFromBytes(imageBytes);
+						future.onComplete(onImageLoaded);
+						future.onError(onImageError);
+					}
 					else
 						onImageLoaded(Image.fromBytes(imageBytes));
 				}
