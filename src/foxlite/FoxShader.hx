@@ -240,8 +240,8 @@ class FoxShader {
 				source = includes.replace(source, "// Skipped: " + file);
 				continue;
 			}
-			#if debug
-			trace("[FoxLite > FoxShader]: Including shader source: " + file);
+			#if foxlite_verbose
+			FoxLog.log("FoxShader", "Including shader source: " + file);
 			#end
 
 			list.push(file);
@@ -251,7 +251,7 @@ class FoxShader {
 				cache = FoxLoaderUtil.loadText(defPath);
 				// Silly but okay
 				if(cache == null) {
-					trace('[FoxLite > FoxShader]: WARNING! FILE NOT FOUND: $defPath');
+					FoxLog.warning('FoxShader', 'FILE NOT FOUND: $defPath');
 					cache = '// MISSING SOURCE: "$file" ($defPath)';
 				}
 				else FoxCache.shaderIncludes().set(defPath, cache);
@@ -275,13 +275,13 @@ class FoxShader {
 		
 		if(FunkinAssets.exists(vert)) vert = FunkinAssets.getContent(vert);
 		else {
-			trace('[FoxLite > FoxShader]: Vertex source not found for $vert');
+			FoxLog.warning('FoxShader', 'Vertex source not found for $vert');
 			vert = "";
 		}
 
 		if(FunkinAssets.exists(frag)) frag = FunkinAssets.getContent(frag);
 		else {
-			trace('[FoxLite > FoxShader]: Fragment source not found for $frag');
+			FoxLog.warning('FoxShader', 'Fragment source not found for $frag');
 			frag = "";
 		}
 
@@ -289,7 +289,9 @@ class FoxShader {
 
 		var shader = FoxShader.fromSources(vert, frag, flags);
 		shader.assetsKey = name;
-		trace("[FoxLite > FoxShader]: Add shader to cache: " + name + defHash);
+		#if foxlite_verbose
+		FoxLog.log("FoxShader", "Add shader to cache: " + name + defHash);
+		#end
 		FoxCache.shaders().set(name + defHash, shader);
 		return shader;
 	}

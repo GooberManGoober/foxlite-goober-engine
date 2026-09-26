@@ -1,5 +1,6 @@
 package foxlite.texture;
 
+import foxlite.FoxLog;
 import StringTools;
 import haxe.crypto.Base64;
 import haxe.io.Path;
@@ -148,7 +149,7 @@ class FoxTexture {
 	**/
 	public function resize(width:Int, height:Int):FoxTexture {
 		if(__format == null || __type == null) {
-			trace("[FoxLite > FoxTexture]: Wrapped/Loaded textures cannot be resized!!!");
+			FoxLog.warning("FoxTexture", "Wrapped/Loaded textures cannot be resized!!!");
 			return this;
 		}
 		glTexture?.dispose();
@@ -217,7 +218,7 @@ class FoxTexture {
 		
 		var isDataUrl = StringTools.startsWith(name, "data:");
 		if(!FunkinAssets.exists(name) && !isDataUrl) {
-			trace('[Foxlite > FoxTexture]: Could not load image: ${name} (Not found.)');
+			FoxLog.warning('FoxTexture', 'Could not load image: ${name} (Not found.)');
 			return null;
 		}
 
@@ -235,15 +236,19 @@ class FoxTexture {
 
 		function onImageLoaded(image:Image) {
 			if(image == null) {
-				trace('[Foxlite > FoxTexture]: Could not create image: ${name} (Image error.)');
+				FoxLog.warning('FoxTexture', 'Could not create image: ${name} (Image error.)');
 				FoxCache.textures().remove(name);
 				return;
 			}
 			else if(image?.buffer == null) {
-				trace('[Foxlite > FoxTexture]: Could not create texture: ${name} (Asset was found, but Buffer is non-existant.)');
+				FoxLog.warning('FoxTexture', 'Could not create texture: ${name} (Asset was found, but Buffer is non-existant.)');
 				FoxCache.textures().remove(name);
 				return;
 			}
+			#if foxlite_verbose
+			// We added it earlier but let the user know that it did load correctly
+			FoxLog.log("FoxTexture", "Add texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
+			#end
 			
 			// Make it compatible with openfl...
 			#if sys
@@ -303,7 +308,7 @@ class FoxTexture {
 	**/
 	public static function fromImageCompressed(name:String, ?params:FoxTextureParams):FoxTexture {
 		if(!FoxRenderer.compressedTexturesSupported) {
-			trace('Error loading compressed texture: $name (Compressed textures are not supported on this device!)');
+			FoxLog.warning('FoxTexture', 'Error loading compressed texture: $name (Compressed textures are not supported on this device!)');
 			return null;
 		}
 
@@ -311,7 +316,7 @@ class FoxTexture {
 
 		var isDataUrl = StringTools.startsWith(name, "data:");
 		if(!FunkinAssets.exists(name) && !isDataUrl) {
-			trace('[Foxlite > FoxTexture]: Could not load compressed image: ${name} (Not found.)');
+			FoxLog.warning('FoxTexture', 'Could not load compressed image: ${name} (Not found.)');
 			return null;
 		}
 
@@ -324,12 +329,14 @@ class FoxTexture {
 		}
 		
 		foxTex.assetsKey = name;
-		trace("[FoxLite > FoxTexture]: Add compressed texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
+		#if foxlite_verbose
+		FoxLog.log("FoxTexture", "Add texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
+		#end
 		FoxCache.textures().set(name, foxTex);
 
 		function onBytesLoaded(bytes:haxe.io.Bytes) {
 			if(bytes == null) {
-				trace('[Foxlite > FoxTexture]: Could not create compressed image: ${name} (ImageBytes error.)');
+				FoxLog.warning('FoxTexture', 'Could not create compressed image: ${name} (ImageBytes error.)');
 				FoxCache.textures().remove(name);
 				return;
 			}
@@ -339,11 +346,15 @@ class FoxTexture {
 				case 0x20534444: __fromDDSBytes(bytes, foxTex); // DDS
 				case 0x5CA1AB13: __fromASTCBytes(bytes, foxTex); // ASTC (astcenc)
 				default: {
-					trace('[Foxlite > FoxTexture]: Could not create compressed image: ${name} (Unrecognized compressed texture. Header: ${bytes.getString(0, 4)})');
+					FoxLog.warning('FoxTexture', 'Could not create compressed image: ${name} (Unrecognized compressed texture. Header: ${bytes.getString(0, 4)})');
 					false;
 				}
 			}
 			if(!result) FoxCache.textures().remove(name);
+			// We added it earlier but let the user know that it did load correctly (also only do it if we actually created it)
+			#if foxlite_verbose
+			else FoxLog.log("FoxTexture", "Add compressed texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
+			#end
 		}
 
 		if(isDataUrl) {
@@ -370,7 +381,7 @@ class FoxTexture {
 	**/
 	@:dox(hide) @:noCompletion public static function __fromDDSBytes(bytes:Bytes, outTex:FoxTexture) {
 		if(bytes.getInt32(0) != 0x20534444) {
-			trace('[Foxlite > FoxTexture]: Invalid DDS image: ${outTex.assetsKey} (Bad magic number.)');
+			FoxLog.warning('FoxTexture', 'Invalid DDS image: ${outTex.assetsKey} (Bad magic number.)');
 			return false;
 		}
 		var reader = new BytesInput(bytes);
@@ -391,7 +402,7 @@ class FoxTexture {
 		var pfFourCC  = reader.readString(4); //pos=84
 			
 		if((pfFlags & 0x4) == 0) { // check FourCC, if we don't have this it means DDS is uncompressed
-			trace('[Foxlite > FoxTexture]: Could not create compressed image: ${outTex.assetsKey} (DDS is uncompressed and not supported.)');
+			FoxLog.warning('FoxTexture', 'Could not create compressed image: ${outTex.assetsKey} (DDS is uncompressed and not supported.)');
 			return false;
 		}
 
@@ -419,7 +430,7 @@ class FoxTexture {
 		}
 
 		if(err != "") {
-			trace('[Foxlite > FoxTexture]: Could not create compressed image: ${outTex.assetsKey} ($err not supported.)');
+			FoxLog.warning('FoxTexture', 'Could not create compressed image: ${outTex.assetsKey} ($err not supported.)');
 			return false;
 		}
 
@@ -436,7 +447,7 @@ class FoxTexture {
 			case 'ETCA': etc2.COMPRESSED_RGBA8_ETC2_EAC; // ETC2_RGBA
 			case 'DX10': 0; // BC6+, BPTC, DXGI
 			default: {
-				trace('[Foxlite > FoxTexture]: Could not create compressed image: ${outTex.assetsKey} (unsupported DDS FourCC: $pfFourCC)');
+				FoxLog.warning('FoxTexture', 'Could not create compressed image: ${outTex.assetsKey} (unsupported DDS FourCC: $pfFourCC)');
 				return false;
 			}
 		}
@@ -476,7 +487,7 @@ class FoxTexture {
 					default: 0;
 				}
 			} catch(e:Dynamic) {
-				trace('[Foxlite > FoxTexture]: Could not create compressed image: ${outTex.assetsKey} (S3TC_SRGB/RGTC/BPTC not supported in this device. Tried to load dxgi format: $dxgiFormat)');
+				FoxLog.warning('FoxTexture', 'Could not create compressed image: ${outTex.assetsKey} (S3TC_SRGB/RGTC/BPTC not supported in this device. Tried to load dxgi format: $dxgiFormat)');
 				return false;
 			}
 
@@ -487,7 +498,7 @@ class FoxTexture {
 			}
 
 			if(glFormat == 0) {
-				trace('[Foxlite > FoxTexture]: Could not create compressed image: ${outTex.assetsKey} (DXGI format not supported: $dxgiFormat)');
+				FoxLog.warning('FoxTexture', 'Could not create compressed image: ${outTex.assetsKey} (DXGI format not supported: $dxgiFormat)');
 				return false;
 			}
 		}
@@ -537,7 +548,7 @@ class FoxTexture {
 
 				var error = gl.getError();
 				if(error != 0) {
-					trace('[Foxlite > FoxTexture]: Warning: Error when loading compressed image: ${outTex.assetsKey}. ${level == 0 ? "Texture" : "Mipmaps"} might not be visible (code: $error)');
+					FoxLog.warning('FoxTexture', 'Warning: Error when loading compressed image: ${outTex.assetsKey}. ${level == 0 ? "Texture" : "Mipmaps"} might not be visible (code: $error)');
 				}
 			}
 			
@@ -560,14 +571,14 @@ class FoxTexture {
 	**/
 	@:dox(hide) @:noCompletion public static function __fromASTCBytes(bytes:Bytes, outTex:FoxTexture) {
 		if(bytes.getInt32(0) != 0x5CA1AB13) {
-			trace('[Foxlite > FoxTexture]: Invalid DDS image: ${outTex.assetsKey} (Bad magic number.)');
+			FoxLog.warning('FoxTexture', 'Invalid DDS image: ${outTex.assetsKey} (Bad magic number.)');
 			return false;
 		}
 
 		final astc = FoxRenderer.extensions.astc;
 		
 		if(astc == null) {
-			trace('[Foxlite > FoxTexture]: Could not create compressed image: ${outTex.assetsKey} (KHR_texture_compression_astc_ldr not supported.)');
+			FoxLog.warning('FoxTexture', 'Could not create compressed image: ${outTex.assetsKey} (KHR_texture_compression_astc_ldr not supported.)');
 			return false;
 		}
 
@@ -599,7 +610,7 @@ class FoxTexture {
 			case 'CA': astc.COMPRESSED_RGBA_ASTC_12x10_KHR;
 			case 'CC': astc.COMPRESSED_RGBA_ASTC_12x12_KHR;
 			default: {
-				trace('[Foxlite > FoxTexture]: Could not create compressed image: ${outTex.assetsKey} (unsupported ASTC format: ${blockX}x${blockY})');
+				FoxLog.warning('FoxTexture', 'Could not create compressed image: ${outTex.assetsKey} (unsupported ASTC format: ${blockX}x${blockY})');
 				return false;
 			}
 		}
@@ -629,7 +640,7 @@ class FoxTexture {
 			
 			var error = gl.getError();
 			if(error != 0) {
-				trace('[Foxlite > FoxTexture]: Warning: Error when loading compressed image: ${outTex.assetsKey}. Texture might not be visible (code: $error)');
+				FoxLog.warning('FoxTexture', 'Error when loading compressed image: ${outTex.assetsKey}. Texture might not be visible (code: $error)');
 			}
 
 			context.__bindGLTexture2D(null);
