@@ -135,9 +135,6 @@ class FoxGLTFLoader {
 		var dir:String = Path.directory(name) + '/';
 		trace('[FoxLite > FoxGLTFLoader]: Attempting to load model from $dir.');
 
-		if(FunkinAssets.exists(dir)) trace('[FoxLite > FoxGLTFLoader]: Model Path does exist.');
-		else trace('[FoxLite > FoxGLTFLoader]: Model Path does NOT exist.');
-
 		var gltfJson:Dynamic = FoxLoaderUtil.loadJSON(name);
 		if(gltfJson == null) {
 			trace('[FoxLite > FoxGLTFLoader]: Could not load $name (Not found.)');
