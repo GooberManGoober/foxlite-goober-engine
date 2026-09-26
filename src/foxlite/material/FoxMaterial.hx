@@ -8,6 +8,7 @@ import foxlite.loaders.FoxMTLLoader;
 import foxlite.material.FoxBlendMode;
 import foxlite.material.FoxDepthCompareMode;
 import foxlite.material.FoxTriangleFace;
+import foxlite.lights.FoxLightData;
 import foxlite.loaders.FoxJSONLoader;
 import foxlite.renderer.FoxRenderer;
 import foxlite.stencil.FoxStencilAction;
@@ -55,6 +56,13 @@ class FoxMaterial {
 		A custom environment only for this material
 	**/
 	public var environment:FoxEnvironment;
+
+	/**
+		A custom light data for this material
+
+		This allows to use custom lights per-material!
+	**/
+	public var lightData:FoxLightData;
 
 	/**
 		This controls the rendering order of materials.
@@ -261,6 +269,7 @@ class FoxMaterial {
 		mat.lineWidth = lineWidth;
 		mat.stencil = stencil;
 		mat.environment = environment;
+		mat.lightData = lightData;
 		return mat;
 	}
 

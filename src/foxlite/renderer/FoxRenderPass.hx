@@ -1,6 +1,6 @@
 /*
 *    ___           __ _ _       
-*   / __\____  __ / /(_) |_ ___ 
+*   / __\__/\__/\_/ /(_) |_ ___ 
 *  / _\/ _ \ \/ // / | | __/ _ \
 * / / | (_) >  </ /__| | ||  __/
 * \/   \___/_/\_\____/_|\__\___| by dwdvIl
@@ -182,7 +182,7 @@ class FoxRenderPass {
 				setGlobals(mat, matShader, camera, framebuffer);
 
 				if(matShader.__hasLights) {
-					camera.lightData?.updateShaderLights(matShader);
+					(mat.lightData ?? camera.lightData)?.updateShaderLights(matShader);
 				}
 				var samplerId = FoxRenderer.useMaterial(context, mat);
 
