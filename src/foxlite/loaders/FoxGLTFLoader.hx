@@ -297,19 +297,21 @@ class FoxGLTFLoader {
 					else params.wrapMode = FoxWrapMode.CLAMP;
 				}
 
+				image.name = name + ':' + (image.name ?? 'Image_${tex.source+1}');
+
 				var texture:FoxTexture = null;
 				if(!isBuffer) {
 					var imagePath = isDataUrl ? image.uri : StringTools.urlDecode(FoxLoaderUtil.filePath(directory + Std.string(image.uri)));
 					texture = FoxTexture.fromImageRaw(imagePath, mipmaps, cast 1, params) ?? FoxRenderer.MISSING_TEXTURE;
 				}
-				else if(!FoxCache.textures().exists(directory + image.name)) {
+				else if(!FoxCache.textures().exists(image.name)) {
 					texture = new FoxTexture();
-					texture.assetsKey = directory + image.name;
+					texture.assetsKey = image.name;
 					texture.wrapMode = params.wrapMode;
 					texture.filter = params.filter;
 					texture.mipFilter = params.mipFilter;
 
-					FoxCache.textures().set(directory + image.name, texture);
+					FoxCache.textures().set(image.name, texture);
 
 					var view = bufferViews[image.bufferView];
 					var buffer = buffers[view.buffer];
@@ -338,7 +340,7 @@ class FoxGLTFLoader {
 
 					function onImageError(e:Dynamic) {
 						trace('[Foxlite > FoxGLTFLoader]: Could not create buffer texture: ${image.name} ($e)');
-						FoxCache.textures().remove(directory + image.name);
+						FoxCache.textures().remove(image.name);
 					}
 					
 					// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)

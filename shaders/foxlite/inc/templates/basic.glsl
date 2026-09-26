@@ -235,9 +235,9 @@ void mainFrag_basic() {
 
 		// From the glTF 2.0 spec
 		vec4 ormData = texture2D(ormMap, foxlite_TexCoordv);
-		float ao   = ormData.r;
-		roughness += ormData.g;
-		metallic  += ormData.b;
+		float ao   = ormData.r + step(ormData.r, 0.0);
+		roughness *= ormData.g;
+		metallic  *= ormData.b;
 	#else
 		// const uniform hack for GLES
 		#define specular uSpecular
@@ -248,7 +248,7 @@ void mainFrag_basic() {
 
 	#ifndef UNSHADED
 	float shininess = max((1.0 - roughness) * (1.0 - roughness) * 256.0, 1.0);
-	albedo.rgb = light(albedo.rgb * ao, -normalView, viewPosition.xyz, specular, shininess);
+	albedo.rgb = light(albedo.rgb, -normalView, viewPosition.xyz, specular, shininess);
 	#endif
 
 	#ifdef SKY_REFLECTIONS
