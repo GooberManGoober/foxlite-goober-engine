@@ -5,7 +5,6 @@ import haxe.crypto.Base64;
 import haxe.io.Path;
 import haxe.io.BytesInput;
 
-import lime.utils.Assets;
 import lime.graphics.opengl.GL;
 import lime.graphics.Image;
 import lime.system.ThreadPool;
@@ -231,6 +230,7 @@ class FoxTexture {
 		}
 		
 		foxTex.assetsKey = name;
+		trace("[FoxLite > FoxTexture]: Add texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
 		FoxCache.textures().set(name, foxTex);
 
 		function onImageLoaded(image:Image) {
@@ -244,8 +244,6 @@ class FoxTexture {
 				FoxCache.textures().remove(name);
 				return;
 			}
-			// We added it earlier but let the user know that it did load correctly
-			trace("[FoxLite > FoxTexture]: Add texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
 			
 			// Make it compatible with openfl...
 			#if sys
@@ -266,11 +264,6 @@ class FoxTexture {
 				FoxRenderer.runTaskAtNextDraw(task);
 		}
 
-		function onImageError(e:Dynamic) {
-			trace('[Foxlite > FoxTexture]: Could not create image: ${name} ($e)');
-			FoxCache.textures().remove(name);
-		}
-
 		if(isDataUrl) {
 			// We can load it right away
 			var components = name.split(',');
@@ -283,13 +276,10 @@ class FoxTexture {
 		}
 		else {
 			// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
-			if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading) {
-				var future = Assets.loadImage(name, false);
-				future.onComplete(onImageLoaded);
-				future.onError(onImageError);
-			}
+			if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading)
+				Image.loadFromFile(name).onComplete(onImageLoaded);
 			else
-				onImageLoaded(Assets.getImage(name));
+				onImageLoaded(Image.fromFile(name));
 		}
 
 		return foxTex;
@@ -334,6 +324,7 @@ class FoxTexture {
 		}
 		
 		foxTex.assetsKey = name;
+		trace("[FoxLite > FoxTexture]: Add compressed texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
 		FoxCache.textures().set(name, foxTex);
 
 		function onBytesLoaded(bytes:haxe.io.Bytes) {
@@ -342,8 +333,6 @@ class FoxTexture {
 				FoxCache.textures().remove(name);
 				return;
 			}
-			// We added it earlier but let the user know that it did load correctly
-			trace("[FoxLite > FoxTexture]: Add compressed texture to cache: " + (StringTools.startsWith(name, "data:") ? "<Base64URL_String>" : name));
 
 			var magic = bytes.getInt32(0);
 			var result = switch(magic) {
@@ -357,11 +346,6 @@ class FoxTexture {
 			if(!result) FoxCache.textures().remove(name);
 		}
 
-		function onBytesError(e:Dynamic) {
-			trace('[Foxlite > FoxTexture]: Could not create compressed image: ${name} ($e)');
-			FoxCache.textures().remove(name);
-		}
-
 		if(isDataUrl) {
 			// We can load it right away
 			var components = name.split(',');
@@ -371,13 +355,10 @@ class FoxTexture {
 		}
 		else {
 			// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
-			if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading) {
-				var future = Assets.loadBytes(name);
-				future.onComplete(onBytesLoaded);
-				future.onError(onBytesError);
-			}
+			if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading)
+				Bytes.loadFromFile(name).onComplete(onBytesLoaded);
 			else
-				onBytesLoaded(Assets.getBytes(name));
+				onBytesLoaded(Bytes.fromFile(name));
 		}
 
 		return foxTex;
