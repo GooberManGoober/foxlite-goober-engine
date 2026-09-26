@@ -53,13 +53,13 @@ class FoxLoaderUtil {
 	public static dynamic function loadJSON(name:String):Dynamic {
 		var path = filePath(name);
 		if(!Assets.exists(path)) return null;
-		return Json.parse(Assets.getText(path));
+		return Json.parse(Assets.getContent(path));
 	}
 
 	public static dynamic function loadText(name:String):String {
 		var path = filePath(name);
 		if(!Assets.exists(path)) return null;
-		return Assets.getText(path);
+		return Assets.getContent(path);
 	}
 	
 	/**
