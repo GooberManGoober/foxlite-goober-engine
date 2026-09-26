@@ -272,13 +272,13 @@ class FoxShader {
 		var vert:String = FoxLoaderUtil.shaderVert(name);
 		var frag:String = FoxLoaderUtil.shaderFrag(name);
 		
-		if(Assets.exists(vert)) vert = Assets.getContent(vert);
+		if(Assets.exists(vert)) vert = Assets.getText(vert);
 		else {
 			trace('[FoxLite > FoxShader]: Vertex source not found for $vert');
 			vert = "";
 		}
 
-		if(Assets.exists(frag)) frag = Assets.getContent(frag);
+		if(Assets.exists(frag)) frag = Assets.getText(frag);
 		else {
 			trace('[FoxLite > FoxShader]: Fragment source not found for $frag');
 			frag = "";
