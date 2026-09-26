@@ -20,8 +20,6 @@ import foxlite.texture.FoxMipFilter;
 import foxlite.texture.FoxTextureFilter;
 import foxlite.texture.FoxWrapMode;
 
-import funkin.FunkinAssets;
-
 import openfl.display.BitmapData;
 import openfl.display3D.Context3D;
 import openfl.display3D.Context3DTextureFormat;
@@ -217,7 +215,7 @@ class FoxTexture {
 		if(FoxCache.textures().exists(name)) return FoxCache.textures().get(name);
 		
 		var isDataUrl = StringTools.startsWith(name, "data:");
-		if(!FunkinAssets.exists(name) && !isDataUrl) {
+		if(!Assets.exists(name) && !isDataUrl) {
 			trace('[Foxlite > FoxTexture]: Could not load image: ${name} (Not found.)');
 			return null;
 		}
@@ -311,7 +309,7 @@ class FoxTexture {
 		if(FoxCache.textures().exists(name)) return FoxCache.textures().get(name);
 
 		var isDataUrl = StringTools.startsWith(name, "data:");
-		if(!FunkinAssets.exists(name) && !isDataUrl) {
+		if(!Assets.exists(name) && !isDataUrl) {
 			trace('[Foxlite > FoxTexture]: Could not load compressed image: ${name} (Not found.)');
 			return null;
 		}
