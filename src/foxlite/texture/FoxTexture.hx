@@ -5,7 +5,7 @@ import haxe.crypto.Base64;
 import haxe.io.Path;
 import haxe.io.BytesInput;
 
-import flixel.FlxG;
+import lime.utils.Assets;
 import lime.graphics.opengl.GL;
 import lime.graphics.Image;
 import lime.system.ThreadPool;
@@ -275,12 +275,12 @@ class FoxTexture {
 			// Loading a compressed texture?
 			foxTex = FoxTexture.fromImageCompressed(name, params);	
 		}
-		else {	
+		else {
 			// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
 			if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading)
-				Image.loadFromFile(name).onComplete(onImageLoaded);
+				Assets.loadImage(name, false).onComplete(onImageLoaded);
 			else
-				onImageLoaded(Image.fromFile(name));
+				onImageLoaded(Assets.getImage(name));
 		}
 
 		return foxTex;
@@ -357,9 +357,9 @@ class FoxTexture {
 		else {
 			// If we're on the main thread, load it async, else lime's own thread pool system clashes with itself (bruh)
 			if(ThreadPool.isMainThread() && !FoxRenderer.forceSyncLoading)
-				Bytes.loadFromFile(name).onComplete(onBytesLoaded);
+				Assets.loadBytes(name).onComplete(onBytesLoaded);
 			else
-				onBytesLoaded(Bytes.fromFile(name));
+				onBytesLoaded(Assets.getBytes(name));
 		}
 
 		return foxTex;
