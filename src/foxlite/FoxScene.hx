@@ -7,6 +7,7 @@ import foxlite.environment.FoxEnvironment;
 
 import funkin.objects.FunkinSprite;
 
+import foxlite.funkin.PolymodUtils;
 import foxlite.group.FoxGroup;
 import foxlite.group.FoxTypedGroup;
 import foxlite.material.FoxMaterial;
@@ -52,7 +53,7 @@ class FoxScene extends FunkinSprite {
 	/**
 		A FoxGroup containing all of foxlite's active objects (including other groups)
 	**/
-	public var foxGroup:FoxTypedGroup<FoxBasic> = new FoxGroup();
+	public var foxGroup:FoxTypedGroup<FoxBasic> = #if !foxlite_polymod new FoxGroup(); #else PolymodUtils.getFoxGroup(); #end
 
 	/**
 		An array containing `FoxCamera`s, this is intended to be used globally

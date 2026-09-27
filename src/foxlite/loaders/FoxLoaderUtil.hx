@@ -1,11 +1,11 @@
 package foxlite.loaders;
 
 import haxe.Json;
-import funkin.FunkinAssets;
+import lime.utils.Assets;
 
 class FoxLoaderUtil {
 
-	public static var PathsClass:Dynamic = funkin.Paths;
+	public static var PathsClass:Dynamic = null;
 
 	/**
 		For Friday Night Funkin' Engines, this is a custom path function for custom library paths.
@@ -23,27 +23,27 @@ class FoxLoaderUtil {
 
 	public static dynamic function jsonPath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/data/$name.json';
-		return PathsClass.getPath('data/$name.json', null, true);
+		return PathsClass.getPath('data/$name.json');
 	}
 
 	public static dynamic function filePath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/$name';
-		return PathsClass.getPath('$name', null, true);
+		return PathsClass.getPath('$name');
 	}
 
 	public static dynamic function imagePath(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/images/$name.png';
-		return PathsClass.image('$name', null, true);
+		return PathsClass.getPath('images/$name.png');
 	}
 
 	public static dynamic function shaderVert(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/shaders/$name.vert';
-		return PathsClass.vertex('$name', null, true);
+		return PathsClass.getPath('shaders/$name.vert');
 	}
 
 	public static dynamic function shaderFrag(name:String):String {
 		if(FoxLoaderUtil.PathsClass == null) return 'assets/shaders/$name.frag';
-		return PathsClass.fragment('$name', null, true);
+		return PathsClass.getPath('shaders/$name.frag');
 	}
 
 	public static dynamic function shaderIncludeRoot(name:String):String {
@@ -52,14 +52,14 @@ class FoxLoaderUtil {
 
 	public static dynamic function loadJSON(name:String):Dynamic {
 		var path = filePath(name);
-		if(!FunkinAssets.exists(path)) return null;
-		return Json.parse(FunkinAssets.getContent(path));
+		if(!Assets.exists(path)) return null;
+		return Json.parse(Assets.getText(path));
 	}
 
 	public static dynamic function loadText(name:String):String {
 		var path = filePath(name);
-		if(!FunkinAssets.exists(path)) return null;
-		return FunkinAssets.getContent(path);
+		if(!Assets.exists(path)) return null;
+		return Assets.getText(path);
 	}
 	
 	/**
